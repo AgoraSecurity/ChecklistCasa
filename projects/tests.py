@@ -281,3 +281,204 @@ class ProjectInvitationModelTest(TestCase):
                 email='duplicate@example.com',
                 invited_by=self.user
             )
+
+
+class ProjectManagementViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.collaborator = User.objects.create_user(
+            username='collaborator',
+            email='collab@example.com',
+            password='testpass123'
+        )
+        self.other_user = User.objects.create_user(
+            username='otheruser',
+            email='other@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Project',
+            owner=self.user
+        )
+        self.project.collaborators.add(self.collaborator)
+
+    def test_project_list_view_authenticated(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get('/projects/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Project')
+
+    def test_project_list_view_unauthenticated(self):
+        response = self.client.get('/projects/')
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_project_create_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post('/projects/create/', {
+            'name': 'New Test Project'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after creation
+        self.assertTrue(Project.objects.filter(name='New Test Project').exists())
+
+    def test_project_detail_view_owner(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Project')
+
+    def test_project_detail_view_collaborator(self):
+        self.client.login(username='collaborator', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Project')
+
+    def test_project_detail_view_unauthorized(self):
+        self.client.login(username='otheruser', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/')
+        self.assertEqual(response.status_code, 302)  # Redirect with error
+
+    def test_project_edit_view_owner(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/edit/', {
+            'name': 'Updated Project Name'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.name, 'Updated Project Name')
+
+    def test_project_edit_view_collaborator_denied(self):
+        self.client.login(username='collaborator', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/edit/', {
+            'name': 'Should Not Update'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.name, 'Test Project')  # Should not change
+
+    def test_project_finish_owner(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/finish/')
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.status, 'finished')
+        self.assertIsNotNone(self.project.finished_at)
+
+    def test_project_finish_collaborator_denied(self):
+        self.client.login(username='collaborator', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/finish/')
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.status, 'active')  # Should not change
+
+
+class ProjectCollaborationViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.collaborator = User.objects.create_user(
+            username='collaborator',
+            email='collab@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Project',
+            owner=self.user
+        )
+
+    def test_send_invitation_owner(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/invite/', {
+            'email': 'newuser@example.com'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(ProjectInvitation.objects.filter(
+            project=self.project,
+            email='newuser@example.com'
+        ).exists())
+
+    def test_send_invitation_collaborator_denied(self):
+        self.project.collaborators.add(self.collaborator)
+        self.client.login(username='collaborator', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/invite/', {
+            'email': 'newuser@example.com'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ProjectInvitation.objects.filter(
+            project=self.project,
+            email='newuser@example.com'
+        ).exists())
+
+    def test_accept_invitation_authenticated(self):
+        invitation = ProjectInvitation.objects.create(
+            project=self.project,
+            email=self.collaborator.email,
+            invited_by=self.user
+        )
+        self.client.login(username='collaborator', password='testpass123')
+        response = self.client.get(f'/projects/invitation/{invitation.token}/')
+        self.assertEqual(response.status_code, 302)
+        invitation.refresh_from_db()
+        self.assertTrue(invitation.accepted)
+        self.assertTrue(self.project.collaborators.filter(id=self.collaborator.id).exists())
+
+    def test_accept_invitation_unauthenticated(self):
+        invitation = ProjectInvitation.objects.create(
+            project=self.project,
+            email='newuser@example.com',
+            invited_by=self.user
+        )
+        response = self.client.get(f'/projects/invitation/{invitation.token}/')
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_remove_collaborator_owner(self):
+        self.project.collaborators.add(self.collaborator)
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/remove/{self.collaborator.pk}/')
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(self.project.collaborators.filter(id=self.collaborator.id).exists())
+
+    def test_cancel_invitation_owner(self):
+        invitation = ProjectInvitation.objects.create(
+            project=self.project,
+            email='cancel@example.com',
+            invited_by=self.user
+        )
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/cancel-invitation/{invitation.pk}/')
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ProjectInvitation.objects.filter(pk=invitation.pk).exists())
+
+
+class ProjectFormTest(TestCase):
+    def test_valid_project_form(self):
+        from projects.forms import ProjectForm
+        form_data = {'name': 'Valid Project Name'}
+        form = ProjectForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_project_form_short_name(self):
+        from projects.forms import ProjectForm
+        form_data = {'name': 'AB'}  # Too short
+        form = ProjectForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+
+    def test_valid_invitation_form(self):
+        from projects.forms import ProjectInvitationForm
+        form_data = {'email': 'test@example.com'}
+        form = ProjectInvitationForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_invitation_form(self):
+        from projects.forms import ProjectInvitationForm
+        form_data = {'email': 'invalid-email'}
+        form = ProjectInvitationForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)

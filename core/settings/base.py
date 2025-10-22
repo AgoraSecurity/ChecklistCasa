@@ -133,6 +133,11 @@ ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Will be overridden in production
+DEFAULT_FROM_EMAIL = 'noreply@checklist.casa'
+SERVER_EMAIL = 'server@checklist.casa'
+
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
