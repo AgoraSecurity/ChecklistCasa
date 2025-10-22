@@ -35,7 +35,7 @@
   - Add form validation and error handling for all input types
   - _Requirements: 3.3, 3.4, 3.5, 4.3, 4.4, 4.5, 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 5. Build comparison table and data visualization
+- [x] 5. Build comparison table and data visualization
   - Create responsive comparison table with visits as rows, criteria as columns
   - Implement sorting and filtering functionality for assessment data
   - Add color coding for assessment values (best/worst highlighting)

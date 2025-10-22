@@ -34,4 +34,8 @@ urlpatterns = [
     path('<int:pk>/realtors/create/', views.realtor_create, name='realtor_create'),
     path('<int:pk>/realtors/<int:realtor_id>/edit/', views.realtor_edit, name='realtor_edit'),
     path('<int:pk>/realtors/<int:realtor_id>/delete/', views.realtor_delete, name='realtor_delete'),
+    
+    # Comparison and export
+    path('<int:pk>/compare/', views.comparison_table, name='comparison_table'),
+    path('<int:pk>/export/csv/', views.export_csv, name='export_csv'),
 ]

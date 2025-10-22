@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.urls import reverse
 from datetime import date
 from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation, Realtor
 
@@ -673,3 +674,157 @@ class VisitAssessmentFormTest(TestCase):
         
         numeric_assessment = VisitAssessment.objects.get(visit=visit, criteria=self.numeric_criteria)
         self.assertEqual(numeric_assessment.get_value(), 1500.00)
+
+class ComparisonViewTest(TestCase):
+    """Test comparison table and export functionality."""
+    
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='comparisonuser',
+            email='comparison@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Housing Project',
+            owner=self.user
+        )
+        
+        # Create test criteria
+        self.criteria1 = Criteria.objects.create(
+            project=self.project,
+            name='Price',
+            type='numeric',
+            weight=2.0,
+            order=1
+        )
+        self.criteria2 = Criteria.objects.create(
+            project=self.project,
+            name='Location Rating',
+            type='rating',
+            weight=1.5,
+            order=2
+        )
+        
+        # Create test visits
+        self.visit1 = Visit.objects.create(
+            project=self.project,
+            name='House A',
+            address='123 Main St',
+            visit_date='2024-01-15',
+            created_by=self.user
+        )
+        self.visit2 = Visit.objects.create(
+            project=self.project,
+            name='House B',
+            address='456 Oak Ave',
+            visit_date='2024-01-20',
+            created_by=self.user
+        )
+        
+        # Create test assessments
+        assessment1 = VisitAssessment.objects.create(visit=self.visit1, criteria=self.criteria1)
+        assessment1.set_value(250000)
+        assessment1.save()
+        
+        assessment2 = VisitAssessment.objects.create(visit=self.visit1, criteria=self.criteria2)
+        assessment2.set_value(4)
+        assessment2.save()
+        
+        assessment3 = VisitAssessment.objects.create(visit=self.visit2, criteria=self.criteria1)
+        assessment3.set_value(300000)
+        assessment3.save()
+        
+        assessment4 = VisitAssessment.objects.create(visit=self.visit2, criteria=self.criteria2)
+        assessment4.set_value(3)
+        assessment4.save()
+        
+        self.client.login(username='comparisonuser', password='testpass123')
+    
+    def test_comparison_table_view(self):
+        """Test comparison table view."""
+        url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Property Comparison')
+        self.assertContains(response, 'House A')
+        self.assertContains(response, 'House B')
+        self.assertContains(response, 'Price')
+        self.assertContains(response, 'Location Rating')
+    
+    def test_comparison_table_sorting(self):
+        """Test comparison table sorting functionality."""
+        url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
+        response = self.client.get(url, {'sort': self.criteria1.id, 'order': 'asc'})
+        self.assertEqual(response.status_code, 200)
+        # Should contain sorted data
+        self.assertContains(response, 'House A')
+        self.assertContains(response, 'House B')
+    
+    def test_comparison_table_filtering(self):
+        """Test comparison table filtering functionality."""
+        url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
+        response = self.client.get(url, {
+            'filter_criterion': self.criteria1.id,
+            'filter_value': '250000'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'House A')
+    
+    def test_csv_export(self):
+        """Test CSV export functionality."""
+        url = reverse('projects:export_csv', kwargs={'pk': self.project.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        self.assertIn('attachment', response['Content-Disposition'])
+        # Check CSV content
+        content = response.content.decode('utf-8')
+        self.assertIn('House A', content)
+        self.assertIn('House B', content)
+        self.assertIn('Price', content)
+    
+
+    
+    def test_comparison_unauthorized_access(self):
+        """Test unauthorized access to comparison table."""
+        other_user = User.objects.create_user(
+            username='otherusercomp',
+            email='othercomp@example.com',
+            password='testpass123'
+        )
+        self.client.login(username='otherusercomp', password='testpass123')
+        
+        url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirect to projects list
+    
+    def test_comparison_no_visits(self):
+        """Test comparison table with no visits."""
+        # Create empty project
+        empty_project = Project.objects.create(
+            name='Empty Project',
+            owner=self.user
+        )
+        
+        url = reverse('projects:comparison_table', kwargs={'pk': empty_project.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirect to visit list
+    
+    def test_comparison_no_criteria(self):
+        """Test comparison table with no criteria."""
+        # Create project with visits but no criteria
+        project_no_criteria = Project.objects.create(
+            name='No Criteria Project',
+            owner=self.user
+        )
+        Visit.objects.create(
+            project=project_no_criteria,
+            name='Test Visit',
+            address='123 Test St',
+            visit_date='2024-01-15',
+            created_by=self.user
+        )
+        
+        url = reverse('projects:comparison_table', kwargs={'pk': project_no_criteria.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirect to criteria list

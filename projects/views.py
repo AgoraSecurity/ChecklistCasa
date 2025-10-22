@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Max
@@ -13,6 +13,8 @@ from django.db import models
 from django.utils import timezone
 import json
 import logging
+import csv
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -969,3 +971,185 @@ def realtor_delete(request, pk, realtor_id):
     messages.success(request, f'Realtor "{realtor_name}" deleted successfully!')
     
     return redirect('projects:realtor_list', pk=project.pk)
+
+# Comparison and Export Views
+
+@login_required
+def comparison_table(request, pk):
+    """Display comparison table with visits and criteria."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    # Get all visits and criteria
+    visits = project.visits.prefetch_related('assessments__criteria').order_by('-visit_date')
+    criteria = project.criteria.all().order_by('order')
+    
+    # Check if there's data to compare
+    if not visits.exists():
+        messages.info(request, "No visits to compare yet. Add some property visits first.")
+        return redirect('projects:visit_list', pk=project.pk)
+    
+    if not criteria.exists():
+        messages.info(request, "No criteria defined yet. Add evaluation criteria first.")
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    # Build comparison data structure
+    comparison_data = []
+    criteria_stats = {}  # For color coding
+    
+    # Initialize criteria stats
+    for criterion in criteria:
+        criteria_stats[criterion.id] = {
+            'values': [],
+            'min_val': None,
+            'max_val': None,
+            'type': criterion.type
+        }
+    
+    # Process each visit
+    for visit in visits:
+        visit_data = {
+            'visit': visit,
+            'assessments': {}
+        }
+        
+        # Get assessments for this visit
+        assessments = {a.criteria.id: a for a in visit.assessments.all()}
+        
+        for criterion in criteria:
+            assessment = assessments.get(criterion.id)
+            value = assessment.get_value() if assessment else None
+            visit_data['assessments'][criterion.id] = {
+                'assessment': assessment,
+                'value': value,
+                'display_value': format_assessment_value(value, criterion.type)
+            }
+            
+            # Collect numeric values for statistics (for color coding)
+            if value is not None and criterion.type in ['numeric', 'rating']:
+                try:
+                    numeric_value = float(value)
+                    criteria_stats[criterion.id]['values'].append(numeric_value)
+                except (ValueError, TypeError):
+                    pass
+        
+        comparison_data.append(visit_data)
+    
+    # Calculate min/max for color coding
+    for criterion_id, stats in criteria_stats.items():
+        if stats['values']:
+            stats['min_val'] = min(stats['values'])
+            stats['max_val'] = max(stats['values'])
+    
+    # Handle sorting
+    sort_by = request.GET.get('sort')
+    sort_order = request.GET.get('order', 'desc')
+    
+    if sort_by:
+        try:
+            criterion_id = int(sort_by)
+            if any(c.id == criterion_id for c in criteria):
+                # Sort by this criterion
+                def sort_key(item):
+                    value = item['assessments'][criterion_id]['value']
+                    if value is None:
+                        return float('-inf') if sort_order == 'desc' else float('inf')
+                    try:
+                        return float(value)
+                    except (ValueError, TypeError):
+                        return str(value) if value else ''
+                
+                comparison_data.sort(key=sort_key, reverse=(sort_order == 'desc'))
+        except (ValueError, TypeError):
+            pass
+    
+    context = {
+        'project': project,
+        'visits': visits,
+        'criteria': criteria,
+        'comparison_data': comparison_data,
+        'criteria_stats': criteria_stats,
+        'sort_by': sort_by,
+        'sort_order': sort_order,
+    }
+    
+    return render(request, 'projects/comparison_table.html', context)
+
+
+def format_assessment_value(value, criteria_type):
+    """Format assessment value for display."""
+    if value is None:
+        return '-'
+    
+    if criteria_type == 'boolean':
+        return 'Yes' if value else 'No'
+    elif criteria_type == 'rating':
+        return f"{value}/5"
+    elif criteria_type == 'numeric':
+        try:
+            # Format numbers nicely
+            num_value = float(value)
+            if num_value == int(num_value):
+                return str(int(num_value))
+            else:
+                return f"{num_value:.2f}".rstrip('0').rstrip('.')
+        except (ValueError, TypeError):
+            return str(value)
+    else:  # text
+        return str(value)
+
+
+@login_required
+def export_csv(request, pk):
+    """Export comparison data as CSV."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    # Create HTTP response with CSV content type
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{project.name}_comparison.csv"'
+    
+    writer = csv.writer(response)
+    
+    # Get data
+    visits = project.visits.prefetch_related('assessments__criteria').order_by('-visit_date')
+    criteria = project.criteria.all().order_by('order')
+    
+    # Write header row
+    header = ['Visit Name', 'Address', 'Visit Date', 'Realtor', 'Notes']
+    header.extend([criterion.name for criterion in criteria])
+    writer.writerow(header)
+    
+    # Write data rows
+    for visit in visits:
+        # Get assessments for this visit
+        assessments = {a.criteria.id: a for a in visit.assessments.all()}
+        
+        row = [
+            visit.name,
+            visit.address,
+            visit.visit_date.strftime('%Y-%m-%d'),
+            str(visit.realtor) if visit.realtor else '',
+            visit.notes
+        ]
+        
+        # Add assessment values
+        for criterion in criteria:
+            assessment = assessments.get(criterion.id)
+            value = assessment.get_value() if assessment else None
+            formatted_value = format_assessment_value(value, criterion.type)
+            row.append(formatted_value)
+        
+        writer.writerow(row)
+    
+    return response
+
+
