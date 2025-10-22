@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ visit.name }} - {{ project.name }} - Housing Evaluation System{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="{% url 'projects:visit_list' project.pk %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Visits
+    </a>
+    
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ visit.name }}</h1>
+            <p class="text-gray-600 mt-2">{{ project.name }}</p>
+        </div>
+        
+        {% if can_edit %}
+            <div class="flex space-x-3">
+                <a href="{% url 'projects:visit_edit' project.pk visit.pk %}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit Visit
+                </a>
+                <form method="post" action="{% url 'projects:visit_delete' project.pk visit.pk %}" class="inline-block"
+                      onsubmit="return confirm('Are you sure you want to delete this visit? This action cannot be undone.')">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Visit Information -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Property Details</h2>
+            
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Address</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ visit.address }}</dd>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Visit Date</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ visit.visit_date|date:"F j, Y" }}</dd>
+                </div>
+                
+                {% if visit.realtor_name %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Realtor/Agent</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ visit.realtor_name }}</dd>
+                    </div>
+                {% endif %}
+                
+                {% if visit.realtor_contact %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Contact Info</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ visit.realtor_contact }}</dd>
+                    </div>
+                {% endif %}
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Logged By</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ visit.created_by.email }}</dd>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ visit.created_at|date:"M j, Y g:i A" }}</dd>
+                </div>
+            </dl>
+            
+            {% if visit.notes %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <dt class="text-sm font-medium text-gray-500 mb-2">Notes</dt>
+                    <dd class="text-sm text-gray-900 whitespace-pre-wrap">{{ visit.notes }}</dd>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Assessments</span>
+                    <span class="text-lg font-semibold text-gray-900">{{ assessments.count }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Photos</span>
+                    <span class="text-lg font-semibold text-gray-900">{{ photos.count }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Completion</span>
+                    <span class="text-lg font-semibold text-gray-900">
+                        {% widthratio assessments.count project.criteria.count 100 %}%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assessment Results -->
+{% if assessments %}
+    <div class="bg-white rounded-lg shadow mb-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Assessment Results</h2>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+            {% for assessment in assessments %}
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-base font-medium text-gray-900">{{ assessment.criteria.name }}</h3>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                           {% if assessment.criteria.type == 'boolean' %}bg-green-100 text-green-800
+                                           {% elif assessment.criteria.type == 'numeric' %}bg-blue-100 text-blue-800
+                                           {% elif assessment.criteria.type == 'rating' %}bg-yellow-100 text-yellow-800
+                                           {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ assessment.criteria.get_type_display }}
+                                </span>
+                                {% if assessment.criteria.weight %}
+                                    <span class="text-xs text-gray-500">Weight: {{ assessment.criteria.weight }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="text-right">
+                            {% with value=assessment.get_value %}
+                                {% if value is not None %}
+                                    <div class="text-lg font-semibold text-gray-900">
+                                        {% if assessment.criteria.type == 'boolean' %}
+                                            {% if value %}
+                                                <span class="text-green-600">✓ Yes</span>
+                                            {% else %}
+                                                <span class="text-red-600">✗ No</span>
+                                            {% endif %}
+                                        {% elif assessment.criteria.type == 'rating' %}
+                                            <div class="flex items-center">
+                                                <span class="mr-2">{{ value }}/5</span>
+                                                <div class="flex">
+                                                    {% for i in "12345" %}
+                                                        <svg class="w-4 h-4 {% if forloop.counter <= value %}text-yellow-400{% else %}text-gray-300{% endif %}" 
+                                                             fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                        </svg>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% elif assessment.criteria.type == 'numeric' %}
+                                            {{ value|floatformat:2 }}
+                                        {% else %}
+                                            <div class="text-sm text-gray-900 max-w-xs truncate">{{ value }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-gray-400 text-sm">Not assessed</span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Photos -->
+{% if photos %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Photos ({{ photos.count }})</h2>
+        </div>
+        
+        <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for photo in photos %}
+                    <div class="group relative">
+                        <div class="aspect-w-16 aspect-h-12 bg-gray-200 rounded-lg overflow-hidden">
+                            <img src="{{ photo.image.url }}" 
+                                 alt="{{ photo.caption|default:'Property photo' }}"
+                                 class="w-full h-48 object-cover group-hover:opacity-75 transition-opacity cursor-pointer"
+                                 onclick="openLightbox('{{ photo.image.url }}', '{{ photo.caption|default:'Property photo' }}')">
+                        </div>
+                        {% if photo.caption %}
+                            <p class="mt-2 text-sm text-gray-600">{{ photo.caption }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Lightbox Modal -->
+<div id="lightbox" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-full">
+        <button onclick="closeLightbox()" 
+                class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <img id="lightbox-image" src="" alt="" class="max-w-full max-h-full object-contain">
+        <p id="lightbox-caption" class="text-white text-center mt-4"></p>
+    </div>
+</div>
+
+<script>
+function openLightbox(imageSrc, caption) {
+    const lightbox = document.getElementById('lightbox');
+    const image = document.getElementById('lightbox-image');
+    const captionEl = document.getElementById('lightbox-caption');
+    
+    image.src = imageSrc;
+    captionEl.textContent = caption;
+    lightbox.classList.remove('hidden');
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('hidden');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
+}
+
+// Close lightbox on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeLightbox();
+    }
+});
+
+// Close lightbox on background click
+document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLightbox();
+    }
+});
+</script>
+{% endblock %}

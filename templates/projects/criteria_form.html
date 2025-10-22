@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - {{ project.name }} - Housing Evaluation System{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="{% url 'projects:criteria_list' project.pk %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Criteria
+    </a>
+    
+    <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+    <p class="text-gray-600 mt-2">{{ project.name }}</p>
+</div>
+
+<div class="max-w-2xl">
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Criteria Name
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.name.errors.0 }}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">
+                    A clear, descriptive name for what you're evaluating (e.g., "Distance to work", "Monthly rent")
+                </p>
+            </div>
+            
+            <div>
+                <label for="{{ form.type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Data Type
+                </label>
+                {{ form.type }}
+                {% if form.type.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.type.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="mt-2 text-sm text-gray-500">
+                    <ul class="space-y-1">
+                        <li><strong>Yes/No:</strong> Simple true/false questions (e.g., "Has parking")</li>
+                        <li><strong>Number:</strong> Numeric values (e.g., rent amount, square footage)</li>
+                        <li><strong>Rating 1-5:</strong> Scale ratings (e.g., neighborhood quality)</li>
+                        <li><strong>Text:</strong> Free-form notes and descriptions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div>
+                <label for="{{ form.weight.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Weight (Optional)
+                </label>
+                {{ form.weight }}
+                {% if form.weight.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.weight.errors.0 }}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">
+                    How important is this criteria? Higher weights (1.0-9.99) indicate more importance. Leave blank if all criteria are equally important.
+                </p>
+            </div>
+            
+            <div>
+                <label for="{{ form.order.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Display Order
+                </label>
+                {{ form.order }}
+                {% if form.order.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.order.errors.0 }}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">
+                    The order in which this criteria appears in forms and comparisons. Lower numbers appear first.
+                </p>
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <a href="{% url 'projects:criteria_list' project.pk %}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    {% if criteria %}Update Criteria{% else %}Create Criteria{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

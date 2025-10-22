@@ -26,7 +26,7 @@
   - Add permission-based access control for project operations
   - _Requirements: 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 9.2_
 
-- [ ] 4. Create criteria management and visit logging system
+- [x] 4. Create criteria management and visit logging system
   - Build criteria CRUD interface with type selection and ordering
   - Implement default criteria templates for housing evaluation
   - Create mobile-optimized visit creation form with multi-step flow

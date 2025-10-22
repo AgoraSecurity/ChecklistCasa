@@ -8,12 +8,19 @@ from django.urls import reverse
 from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
+from django.db.models import Q, Max
+from django.db import models
 from django.utils import timezone
 import json
+import logging
 
-from .models import Project, ProjectInvitation
-from .forms import ProjectForm, ProjectInvitationForm
+logger = logging.getLogger(__name__)
+
+from .models import Project, ProjectInvitation, Criteria, Visit, VisitAssessment, VisitPhoto
+from .forms import (
+    ProjectForm, ProjectInvitationForm, CriteriaForm, VisitForm, 
+    VisitAssessmentForm, VisitPhotoForm, DefaultCriteriaForm
+)
 
 
 @login_required
@@ -296,3 +303,483 @@ def cancel_invitation(request, pk, invitation_id):
     messages.success(request, f'Invitation to {email} has been cancelled.')
     
     return redirect('projects:detail', pk=project.pk)
+
+
+# Criteria Management Views
+
+@login_required
+def criteria_list(request, pk):
+    """Display and manage project criteria."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    criteria = project.criteria.all()
+    
+    context = {
+        'project': project,
+        'criteria': criteria,
+        'can_edit': project.status == 'active',
+    }
+    return render(request, 'projects/criteria_list.html', context)
+
+
+@login_required
+def criteria_create(request, pk):
+    """Create new criteria for project."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot add criteria to finished projects.")
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    if request.method == 'POST':
+        form = CriteriaForm(request.POST)
+        if form.is_valid():
+            criteria = form.save(commit=False)
+            criteria.project = project
+            
+            # Set order if not provided
+            if not criteria.order:
+                max_order = project.criteria.aggregate(
+                    max_order=models.Max('order')
+                )['max_order'] or 0
+                criteria.order = max_order + 1
+            
+            try:
+                criteria.save()
+                messages.success(request, f'Criteria "{criteria.name}" created successfully!')
+                return redirect('projects:criteria_list', pk=project.pk)
+            except Exception as e:
+                if 'UNIQUE constraint failed' in str(e):
+                    form.add_error('name', 'A criteria with this name already exists in this project.')
+                else:
+                    messages.error(request, 'An error occurred while saving the criteria.')
+    else:
+        # Set default order
+        max_order = project.criteria.aggregate(
+            max_order=models.Max('order')
+        )['max_order'] or 0
+        form = CriteriaForm(initial={'order': max_order + 1})
+    
+    context = {
+        'project': project,
+        'form': form,
+        'title': 'Add New Criteria'
+    }
+    return render(request, 'projects/criteria_form.html', context)
+
+
+@login_required
+def criteria_edit(request, pk, criteria_id):
+    """Edit existing criteria."""
+    project = get_object_or_404(Project, pk=pk)
+    criteria = get_object_or_404(Criteria, pk=criteria_id, project=project)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot edit criteria in finished projects.")
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    if request.method == 'POST':
+        form = CriteriaForm(request.POST, instance=criteria)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, f'Criteria "{criteria.name}" updated successfully!')
+                return redirect('projects:criteria_list', pk=project.pk)
+            except Exception as e:
+                if 'UNIQUE constraint failed' in str(e):
+                    form.add_error('name', 'A criteria with this name already exists in this project.')
+                else:
+                    messages.error(request, 'An error occurred while updating the criteria.')
+    else:
+        form = CriteriaForm(instance=criteria)
+    
+    context = {
+        'project': project,
+        'criteria': criteria,
+        'form': form,
+        'title': f'Edit "{criteria.name}"'
+    }
+    return render(request, 'projects/criteria_form.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def criteria_delete(request, pk, criteria_id):
+    """Delete criteria."""
+    project = get_object_or_404(Project, pk=pk)
+    criteria = get_object_or_404(Criteria, pk=criteria_id, project=project)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot delete criteria from finished projects.")
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    criteria_name = criteria.name
+    criteria.delete()
+    messages.success(request, f'Criteria "{criteria_name}" deleted successfully!')
+    
+    return redirect('projects:criteria_list', pk=project.pk)
+
+
+@login_required
+def add_default_criteria(request, pk):
+    """Add default criteria templates to project."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot add criteria to finished projects.")
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    if request.method == 'POST':
+        form = DefaultCriteriaForm(request.POST)
+        if form.is_valid():
+            template_criteria = form.get_template_criteria()
+            added_count = 0
+            
+            for criteria_data in template_criteria:
+                # Check if criteria with this name already exists
+                if not project.criteria.filter(name=criteria_data['name']).exists():
+                    Criteria.objects.create(
+                        project=project,
+                        **criteria_data
+                    )
+                    added_count += 1
+            
+            if added_count > 0:
+                messages.success(request, f'Added {added_count} criteria from template!')
+            else:
+                messages.info(request, 'All criteria from this template already exist in your project.')
+            
+            return redirect('projects:criteria_list', pk=project.pk)
+    else:
+        form = DefaultCriteriaForm()
+    
+    context = {
+        'project': project,
+        'form': form,
+    }
+    return render(request, 'projects/add_default_criteria.html', context)
+
+
+# Visit Management Views
+
+@login_required
+def visit_list(request, pk):
+    """Display project visits."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    visits = project.visits.all()
+    
+    context = {
+        'project': project,
+        'visits': visits,
+        'can_add': project.status == 'active',
+    }
+    return render(request, 'projects/visit_list.html', context)
+
+
+@login_required
+def visit_create(request, pk):
+    """Create new visit with multi-step form."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot add visits to finished projects.")
+        return redirect('projects:visit_list', pk=project.pk)
+    
+    # Check if project has criteria
+    if not project.criteria.exists():
+        messages.warning(request, 
+            "Please add some evaluation criteria before logging visits. "
+            "You can use default templates or create custom criteria."
+        )
+        return redirect('projects:criteria_list', pk=project.pk)
+    
+    step = request.GET.get('step', '1')
+    
+    if request.method == 'POST':
+        logger.info(f"Visit creation POST request - Step: {step}, User: {request.user.id}, Project: {project.id}")
+        
+        if step == '1':
+            # Step 1: Basic visit information
+            visit_form = VisitForm(request.POST)
+            if visit_form.is_valid():
+                logger.info(f"Step 1 form valid - storing data in session")
+                # Store form data in session
+                request.session['visit_data'] = visit_form.cleaned_data
+                request.session['visit_data']['visit_date'] = visit_form.cleaned_data['visit_date'].isoformat()
+                return redirect(f"{request.path}?step=2")
+            else:
+                logger.warning(f"Step 1 form invalid - errors: {visit_form.errors}")
+                # Form has errors, will be displayed in the template
+        
+        elif step == '2':
+            # Step 2: Assessments
+            assessment_form = VisitAssessmentForm(project, request.POST)
+            if assessment_form.is_valid():
+                logger.info(f"Step 2 form valid - creating visit")
+                # Get visit data from session
+                visit_data = request.session.get('visit_data')
+                if not visit_data:
+                    logger.error(f"Step 2 - no visit data in session")
+                    messages.error(request, "Session expired. Please start over.")
+                    return redirect('projects:visit_create', pk=project.pk)
+                
+                try:
+                    # Create visit
+                    from datetime import datetime
+                    visit_data['visit_date'] = datetime.fromisoformat(visit_data['visit_date']).date()
+                    
+                    visit = Visit.objects.create(
+                        project=project,
+                        created_by=request.user,
+                        **visit_data
+                    )
+                    logger.info(f"Visit created with ID: {visit.id}")
+                    
+                    # Save assessments
+                    assessments = assessment_form.save_assessments(visit)
+                    logger.info(f"Saved {len(assessments)} assessments")
+                    
+                    # Store visit ID for photo upload
+                    request.session['visit_id'] = visit.id
+                    
+                    # Clear visit data from session
+                    if 'visit_data' in request.session:
+                        del request.session['visit_data']
+                    
+                    return redirect(f"{request.path}?step=3")
+                    
+                except Exception as e:
+                    logger.error(f"Error creating visit: {str(e)}")
+                    messages.error(request, f"Error creating visit: {str(e)}")
+                    return redirect('projects:visit_create', pk=project.pk)
+            else:
+                logger.warning(f"Step 2 form invalid - errors: {assessment_form.errors}")
+                # Form has errors, will be displayed in the template
+        
+        elif step == '3':
+            # Step 3: Photo upload
+            visit_id = request.session.get('visit_id')
+            if not visit_id:
+                messages.error(request, "Session expired. Please start over.")
+                return redirect('projects:visit_create', pk=project.pk)
+            
+            visit = get_object_or_404(Visit, pk=visit_id, project=project)
+            
+            # Handle photo uploads
+            photos_uploaded = 0
+            for i in range(5):  # Max 5 photos
+                photo_file = request.FILES.get(f'photo_{i}')
+                caption = request.POST.get(f'caption_{i}', '')
+                
+                if photo_file:
+                    # Validate photo
+                    if photo_file.size > 5 * 1024 * 1024:  # 5MB limit
+                        messages.warning(request, f"Photo {i+1} was too large and skipped (max 5MB).")
+                        continue
+                    
+                    if not photo_file.content_type.startswith('image/'):
+                        messages.warning(request, f"Photo {i+1} was not a valid image and skipped.")
+                        continue
+                    
+                    VisitPhoto.objects.create(
+                        visit=visit,
+                        image=photo_file,
+                        caption=caption,
+                        order=i
+                    )
+                    photos_uploaded += 1
+            
+            # Clear session
+            if 'visit_id' in request.session:
+                del request.session['visit_id']
+            
+            if photos_uploaded > 0:
+                messages.success(request, f'Visit "{visit.name}" created successfully with {photos_uploaded} photos!')
+            else:
+                messages.success(request, f'Visit "{visit.name}" created successfully!')
+            
+            return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
+    
+    # GET request or form with errors - show appropriate step
+    if step == '1':
+        # If we're here from a POST with errors, visit_form will already be defined
+        if 'visit_form' not in locals():
+            visit_form = VisitForm()
+        
+        context = {
+            'project': project,
+            'form': visit_form,
+            'step': 1,
+            'title': 'Step 1: Basic Information'
+        }
+        return render(request, 'projects/visit_create_step1.html', context)
+    
+    elif step == '2':
+        # Check if we have visit data from step 1
+        visit_data = request.session.get('visit_data')
+        if not visit_data:
+            logger.warning(f"Step 2 GET - no visit data in session")
+            messages.error(request, "Please complete step 1 first.")
+            return redirect('projects:visit_create', pk=project.pk)
+        
+        # If we're here from a POST with errors, assessment_form will already be defined
+        if 'assessment_form' not in locals():
+            assessment_form = VisitAssessmentForm(project)
+        
+        context = {
+            'project': project,
+            'form': assessment_form,
+            'visit_data': visit_data,
+            'step': 2,
+            'title': 'Step 2: Property Assessment'
+        }
+        return render(request, 'projects/visit_create_step2.html', context)
+    
+    elif step == '3':
+        # Check if we have visit ID
+        visit_id = request.session.get('visit_id')
+        if not visit_id:
+            messages.error(request, "Please complete steps 1 and 2 first.")
+            return redirect('projects:visit_create', pk=project.pk)
+        
+        visit = get_object_or_404(Visit, pk=visit_id, project=project)
+        context = {
+            'project': project,
+            'visit': visit,
+            'step': 3,
+            'title': 'Step 3: Upload Photos (Optional)'
+        }
+        return render(request, 'projects/visit_create_step3.html', context)
+    
+    else:
+        return redirect('projects:visit_create', pk=project.pk)
+
+
+@login_required
+def visit_detail(request, pk, visit_id):
+    """Display visit details."""
+    project = get_object_or_404(Project, pk=pk)
+    visit = get_object_or_404(Visit, pk=visit_id, project=project)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    assessments = visit.assessments.select_related('criteria').order_by('criteria__order')
+    photos = visit.photos.all()
+    
+    context = {
+        'project': project,
+        'visit': visit,
+        'assessments': assessments,
+        'photos': photos,
+        'can_edit': project.status == 'active',
+    }
+    return render(request, 'projects/visit_detail.html', context)
+
+
+@login_required
+def visit_edit(request, pk, visit_id):
+    """Edit existing visit."""
+    project = get_object_or_404(Project, pk=pk)
+    visit = get_object_or_404(Visit, pk=visit_id, project=project)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot edit visits in finished projects.")
+        return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
+    
+    if request.method == 'POST':
+        visit_form = VisitForm(request.POST, instance=visit)
+        assessment_form = VisitAssessmentForm(project, request.POST)
+        
+        if visit_form.is_valid() and assessment_form.is_valid():
+            visit_form.save()
+            
+            # Update assessments
+            assessment_form.save_assessments(visit)
+            
+            messages.success(request, f'Visit "{visit.name}" updated successfully!')
+            return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
+    else:
+        visit_form = VisitForm(instance=visit)
+        
+        # Pre-populate assessment form with existing data
+        initial_data = {}
+        for assessment in visit.assessments.all():
+            field_name = f'criteria_{assessment.criteria.id}'
+            initial_data[field_name] = assessment.get_value()
+        
+        assessment_form = VisitAssessmentForm(project, initial=initial_data)
+    
+    context = {
+        'project': project,
+        'visit': visit,
+        'visit_form': visit_form,
+        'assessment_form': assessment_form,
+    }
+    return render(request, 'projects/visit_edit.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def visit_delete(request, pk, visit_id):
+    """Delete visit."""
+    project = get_object_or_404(Project, pk=pk)
+    visit = get_object_or_404(Visit, pk=visit_id, project=project)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot delete visits from finished projects.")
+        return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
+    
+    visit_name = visit.name
+    visit.delete()
+    messages.success(request, f'Visit "{visit_name}" deleted successfully!')
+    
+    return redirect('projects:visit_list', pk=project.pk)

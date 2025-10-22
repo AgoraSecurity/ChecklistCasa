@@ -482,3 +482,200 @@ class ProjectFormTest(TestCase):
         form = ProjectInvitationForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
+
+
+class CriteriaManagementViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.collaborator = User.objects.create_user(
+            username='collaborator',
+            email='collab@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Project',
+            owner=self.user
+        )
+        self.project.collaborators.add(self.collaborator)
+
+    def test_criteria_list_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/criteria/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_criteria_create_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/criteria/create/', {
+            'name': 'Test Criteria',
+            'type': 'numeric',
+            'weight': 1.5,
+            'order': 1
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Criteria.objects.filter(name='Test Criteria').exists())
+
+    def test_add_default_criteria_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/criteria/add-defaults/', {
+            'template': 'basic_housing'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(self.project.criteria.count() > 0)
+
+
+class VisitManagementViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Project',
+            owner=self.user
+        )
+        # Add some criteria for testing
+        self.criteria = Criteria.objects.create(
+            project=self.project,
+            name='Test Criteria',
+            type='numeric',
+            order=1
+        )
+
+    def test_visit_list_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/visits/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_visit_create_step1(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(f'/projects/{self.project.pk}/visits/create/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Step 1')
+
+    def test_visit_create_step1_post(self):
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(f'/projects/{self.project.pk}/visits/create/', {
+            'name': 'Test Property',
+            'address': '123 Test Street, Test City, TC 12345',
+            'visit_date': date.today().isoformat(),
+            'realtor_name': 'John Doe',
+            'realtor_contact': 'john@test.com',
+            'notes': 'Test notes'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('step=2', response.url)
+
+
+class CriteriaFormTest(TestCase):
+    def test_valid_criteria_form(self):
+        from projects.forms import CriteriaForm
+        form_data = {
+            'name': 'Test Criteria',
+            'type': 'numeric',
+            'weight': 1.5,
+            'order': 1
+        }
+        form = CriteriaForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_criteria_form_short_name(self):
+        from projects.forms import CriteriaForm
+        form_data = {
+            'name': 'X',  # Too short
+            'type': 'numeric',
+            'order': 1
+        }
+        form = CriteriaForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+
+
+class VisitFormTest(TestCase):
+    def test_valid_visit_form(self):
+        from projects.forms import VisitForm
+        form_data = {
+            'name': 'Test Property',
+            'address': '123 Test Street, Test City, TC 12345',
+            'visit_date': date.today(),
+            'realtor_name': 'John Doe',
+            'realtor_contact': 'john@test.com',
+            'notes': 'Test notes'
+        }
+        form = VisitForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_visit_form_short_name(self):
+        from projects.forms import VisitForm
+        form_data = {
+            'name': 'X',  # Too short
+            'address': '123 Test Street, Test City, TC 12345',
+            'visit_date': date.today()
+        }
+        form = VisitForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+
+
+class VisitAssessmentFormTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.project = Project.objects.create(
+            name='Test Project',
+            owner=self.user
+        )
+        self.boolean_criteria = Criteria.objects.create(
+            project=self.project,
+            name='Has Parking',
+            type='boolean',
+            order=1
+        )
+        self.numeric_criteria = Criteria.objects.create(
+            project=self.project,
+            name='Monthly Rent',
+            type='numeric',
+            order=2
+        )
+
+    def test_assessment_form_creation(self):
+        from projects.forms import VisitAssessmentForm
+        form = VisitAssessmentForm(self.project)
+        self.assertEqual(len(form.fields), 2)
+        self.assertIn(f'criteria_{self.boolean_criteria.id}', form.fields)
+        self.assertIn(f'criteria_{self.numeric_criteria.id}', form.fields)
+
+    def test_assessment_form_save(self):
+        from projects.forms import VisitAssessmentForm
+        visit = Visit.objects.create(
+            project=self.project,
+            name='Test Property',
+            address='123 Test St',
+            visit_date=date.today(),
+            created_by=self.user
+        )
+        
+        form_data = {
+            f'criteria_{self.boolean_criteria.id}': True,
+            f'criteria_{self.numeric_criteria.id}': 1500.00,
+        }
+        
+        form = VisitAssessmentForm(self.project, data=form_data)
+        self.assertTrue(form.is_valid())
+        
+        assessments = form.save_assessments(visit)
+        self.assertEqual(len(assessments), 2)
+        
+        # Verify assessments were saved correctly
+        boolean_assessment = VisitAssessment.objects.get(visit=visit, criteria=self.boolean_criteria)
+        self.assertTrue(boolean_assessment.get_value())
+        
+        numeric_assessment = VisitAssessment.objects.get(visit=visit, criteria=self.numeric_criteria)
+        self.assertEqual(numeric_assessment.get_value(), 1500.00)
