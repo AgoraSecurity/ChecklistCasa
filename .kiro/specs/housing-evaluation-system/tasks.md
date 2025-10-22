@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Set up Django project structure and authentication
+- [X] 1. Set up Django project structure and authentication
   - Create Django 5.2+ project with uv package management
   - Configure settings structure (base, development, production)
   - Implement Django Allauth for secure authentication and user registration
@@ -8,7 +8,7 @@
   - Configure security settings for internet exposure (CSRF, secure cookies, etc.)
   - _Requirements: 9.1, 9.3, 9.4, 9.5_
 
-- [ ] 2. Implement core data models and database structure
+- [-] 2. Implement core data models and database structure
   - Create Project model with owner/collaborator relationships
   - Implement Criteria model with type validation and ordering
   - Create Visit model with basic property information
