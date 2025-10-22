@@ -12,6 +12,7 @@ inclusion: always
 - Use `make` commands when available for consistency
 - Run all the tests and verify the are passing before finishing a task
 - **NEVER** use `uv run python manage.py shell` for quick testing
+- All templates should have consistent styling and functionality
 
 ```bash
 # Required command patterns

@@ -113,10 +113,10 @@ class CriteriaForm(forms.ModelForm):
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'weight': RangeInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'min': '0.01',
-                'max': '9.99',
-                'step': '0.01',
+                'class': 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider',
+                'min': '0.5',
+                'max': '10',
+                'step': '0.5',
                 'data-show-value': 'true'
             }),
             'order': forms.NumberInput(attrs={
@@ -135,8 +135,8 @@ class CriteriaForm(forms.ModelForm):
     
     def clean_weight(self):
         weight = self.cleaned_data.get('weight')
-        if weight is not None and (weight < 0.01 or weight > 9.99):
-            raise forms.ValidationError("Weight must be between 0.01 and 9.99.")
+        if weight is not None and (weight < 0.5 or weight > 10):
+            raise forms.ValidationError("Weight must be between 0.5 and 10.")
         return weight
 
 
@@ -207,10 +207,6 @@ class VisitForm(forms.ModelForm):
     
     def clean_address(self):
         address = self.cleaned_data.get('address')
-        if address:
-            address = address.strip()
-            if len(address) < 10:
-                raise forms.ValidationError("Please provide a complete address.")
         return address
     
     def clean(self):
@@ -266,11 +262,15 @@ class VisitAssessmentForm(forms.Form):
                     required=False,
                     min_value=1,
                     max_value=5,
-                    widget=forms.NumberInput(attrs={
-                        'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    widget=RangeInput(attrs={
+                        'class': 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider',
                         'min': '1',
-                        'max': '5'
-                    })
+                        'max': '5',
+                        'step': '1',
+                        'data-criteria-type': 'rating',
+                        'data-show-value': 'true'
+                    }),
+                    help_text="Scale from 1 (Poor) to 5 (Excellent)"
                 )
             else:  # text
                 self.fields[field_name] = forms.CharField(
