@@ -8,7 +8,7 @@
   - Configure security settings for internet exposure (CSRF, secure cookies, etc.)
   - _Requirements: 9.1, 9.3, 9.4, 9.5_
 
-- [-] 2. Implement core data models and database structure
+- [x] 2. Implement core data models and database structure
   - Create Project model with owner/collaborator relationships
   - Implement Criteria model with type validation and ordering
   - Create Visit model with basic property information
