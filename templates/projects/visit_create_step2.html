@@ -79,31 +79,20 @@
                                 {{ field.label }}
                             </label>
                             
-                            {% if 'boolean' in field.field.widget.attrs.class %}
-                                <div class="flex items-center">
-                                    {{ field }}
-                                    <label for="{{ field.id_for_label }}" class="ml-2 text-sm text-gray-600">
-                                        Yes / Available
-                                    </label>
-                                </div>
-                            {% elif 'rating' in field.name %}
-                                <div class="flex items-center space-x-2">
-                                    {{ field }}
-                                    <span class="text-sm text-gray-500">(1 = Poor, 5 = Excellent)</span>
-                                </div>
-                            {% else %}
-                                {{ field }}
-                            {% endif %}
+                            {{ field }}
                             
                             {% if field.errors %}
-                                <div class="mt-2 text-sm text-red-600">
+                                <div class="mt-2 text-sm text-red-600 flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
                                     {{ field.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
                         
-                        <div class="ml-4 text-sm text-gray-500">
-                            Optional
+                        <div class="ml-4 flex flex-col items-end">
+                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Optional</span>
                         </div>
                     </div>
                 </div>
@@ -156,6 +145,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (field) {
                     if (field.type === 'checkbox') {
                         field.checked = data[key];
+                    } else if (field.type === 'range') {
+                        field.value = data[key];
+                        // Trigger input event to update display
+                        field.dispatchEvent(new Event('input'));
                     } else {
                         field.value = data[key];
                     }

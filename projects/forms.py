@@ -4,6 +4,16 @@ from django.core.exceptions import ValidationError
 from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto
 
 
+class RangeInput(forms.TextInput):
+    """Custom range input widget"""
+    input_type = 'range'
+
+
+class TelInput(forms.TextInput):
+    """Custom telephone input widget"""
+    input_type = 'tel'
+
+
 class ProjectForm(forms.ModelForm):
     """Form for creating and editing projects."""
     
@@ -60,12 +70,12 @@ class CriteriaForm(forms.ModelForm):
             'type': forms.Select(attrs={
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-            'weight': forms.NumberInput(attrs={
+            'weight': RangeInput(attrs={
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': '1.00',
-                'step': '0.01',
                 'min': '0.01',
-                'max': '9.99'
+                'max': '9.99',
+                'step': '0.01',
+                'data-show-value': 'true'
             }),
             'order': forms.NumberInput(attrs={
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -96,32 +106,36 @@ class VisitForm(forms.ModelForm):
         fields = ['name', 'address', 'realtor_name', 'realtor_contact', 'visit_date', 'notes']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Enter property name or identifier',
-                'maxlength': '200'
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
+                'placeholder': '🏠 Enter property name or identifier',
+                'maxlength': '200',
+                'autocomplete': 'off'
             }),
             'address': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Enter full property address',
-                'rows': 3
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all',
+                'placeholder': '📍 Enter full property address\n123 Main St, City, State 12345',
+                'rows': 3,
+                'autocomplete': 'street-address'
             }),
             'realtor_name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Realtor or agent name (optional)',
-                'maxlength': '100'
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
+                'placeholder': '👤 Realtor or agent name (optional)',
+                'maxlength': '100',
+                'autocomplete': 'name'
             }),
-            'realtor_contact': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Phone number or email (optional)',
-                'maxlength': '100'
+            'realtor_contact': TelInput(attrs={
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
+                'placeholder': '📞 Phone number or email (optional)',
+                'maxlength': '100',
+                'autocomplete': 'tel'
             }),
             'visit_date': forms.DateInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
                 'type': 'date'
             }),
             'notes': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Additional notes about the visit (optional)',
+                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all',
+                'placeholder': '📝 Additional notes about the visit (optional)\n\nFirst impressions, things to remember, questions to ask...',
                 'rows': 4
             })
         }

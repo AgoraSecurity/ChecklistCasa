@@ -1,0 +1,200 @@
+/* Enhanced form styling for visit creation */
+
+/* Range slider styling */
+.range-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #ef4444 0%, #f97316 25%, #eab308 50%, #3b82f6 75%, #10b981 100%);
+    outline: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.range-slider:hover {
+    opacity: 1;
+}
+
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #3b82f6;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.range-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #3b82f6;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.range-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Weight slider styling */
+input[type="range"][data-show-value="true"] {
+    background: linear-gradient(to right, #e5e7eb 0%, #3b82f6 50%, #1d4ed8 100%);
+}
+
+/* Boolean toggle styling */
+.peer:checked ~ .peer-checked\:bg-blue-600 {
+    background-color: #2563eb;
+}
+
+.peer:checked ~ .peer-checked\:after\:translate-x-full::after {
+    transform: translateX(100%);
+}
+
+/* Form field focus animations */
+.form-field-container {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.form-field-container:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+/* Mobile-optimized input styling */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="number"],
+    textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 16px;
+    }
+    
+    .range-slider::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .range-slider::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Numeric input with currency symbol */
+.currency-input {
+    padding-left: 2.5rem;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.125rem;
+    pointer-events: none;
+}
+
+/* Progress indicator styling */
+.progress-step {
+    transition: all 0.3s ease;
+}
+
+.progress-step.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+.progress-step.completed {
+    background-color: #10b981;
+    color: white;
+}
+
+/* Form validation styling */
+.field-error {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Loading states */
+.form-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.form-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .range-slider {
+        background: #000000;
+        border: 2px solid #ffffff;
+    }
+    
+    .range-slider::-webkit-slider-thumb {
+        background: #ffffff;
+        border: 2px solid #000000;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .form-field-container {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+    
+    .form-field-container:focus-within {
+        border-color: #60a5fa;
+        box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
+    }
+}
