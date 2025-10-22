@@ -16,10 +16,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from .models import Project, ProjectInvitation, Criteria, Visit, VisitAssessment, VisitPhoto
+from .models import Project, ProjectInvitation, Criteria, Visit, VisitAssessment, VisitPhoto, Realtor
 from .forms import (
     ProjectForm, ProjectInvitationForm, CriteriaForm, VisitForm, 
-    VisitAssessmentForm, VisitPhotoForm, DefaultCriteriaForm
+    VisitAssessmentForm, VisitPhotoForm, DefaultCriteriaForm, RealtorForm
 )
 
 
@@ -536,12 +536,25 @@ def visit_create(request, pk):
         
         if step == '1':
             # Step 1: Basic visit information
-            visit_form = VisitForm(request.POST)
+            visit_form = VisitForm(project=project, user=request.user, data=request.POST)
+            
+            # Handle "Add new realtor" selection
+            if 'realtor_choice' in request.POST and request.POST['realtor_choice'] == 'add_new':
+                # Redirect to realtor creation with return URL
+                return redirect(f'/projects/{project.pk}/realtors/create/?next={request.path}')
+            
             if visit_form.is_valid():
                 logger.info(f"Step 1 form valid - storing data in session")
                 # Store form data in session
-                request.session['visit_data'] = visit_form.cleaned_data
-                request.session['visit_data']['visit_date'] = visit_form.cleaned_data['visit_date'].isoformat()
+                cleaned_data = visit_form.cleaned_data.copy()
+                # Remove realtor_choice from session data as it's not a model field
+                cleaned_data.pop('realtor_choice', None)
+                request.session['visit_data'] = cleaned_data
+                request.session['visit_data']['visit_date'] = cleaned_data['visit_date'].isoformat()
+                # Handle realtor field
+                if cleaned_data.get('realtor'):
+                    request.session['visit_data']['realtor_id'] = cleaned_data['realtor'].id
+                    request.session['visit_data'].pop('realtor', None)  # Remove non-serializable object
                 return redirect(f"{request.path}?step=2")
             else:
                 logger.warning(f"Step 1 form invalid - errors: {visit_form.errors}")
@@ -564,9 +577,18 @@ def visit_create(request, pk):
                     from datetime import datetime
                     visit_data['visit_date'] = datetime.fromisoformat(visit_data['visit_date']).date()
                     
+                    # Handle realtor
+                    realtor = None
+                    if 'realtor_id' in visit_data:
+                        try:
+                            realtor = Realtor.objects.get(id=visit_data.pop('realtor_id'))
+                        except Realtor.DoesNotExist:
+                            pass
+                    
                     visit = Visit.objects.create(
                         project=project,
                         created_by=request.user,
+                        realtor=realtor,
                         **visit_data
                     )
                     logger.info(f"Visit created with ID: {visit.id}")
@@ -640,7 +662,7 @@ def visit_create(request, pk):
     if step == '1':
         # If we're here from a POST with errors, visit_form will already be defined
         if 'visit_form' not in locals():
-            visit_form = VisitForm()
+            visit_form = VisitForm(project=project, user=request.user)
         
         context = {
             'project': project,
@@ -731,7 +753,7 @@ def visit_edit(request, pk, visit_id):
         return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
     
     if request.method == 'POST':
-        visit_form = VisitForm(request.POST, instance=visit)
+        visit_form = VisitForm(project=project, user=request.user, data=request.POST, instance=visit)
         assessment_form = VisitAssessmentForm(project, request.POST)
         
         if visit_form.is_valid() and assessment_form.is_valid():
@@ -743,7 +765,7 @@ def visit_edit(request, pk, visit_id):
             messages.success(request, f'Visit "{visit.name}" updated successfully!')
             return redirect('projects:visit_detail', pk=project.pk, visit_id=visit.pk)
     else:
-        visit_form = VisitForm(instance=visit)
+        visit_form = VisitForm(project=project, user=request.user, instance=visit)
         
         # Pre-populate assessment form with existing data
         initial_data = {}
@@ -783,3 +805,167 @@ def visit_delete(request, pk, visit_id):
     messages.success(request, f'Visit "{visit_name}" deleted successfully!')
     
     return redirect('projects:visit_list', pk=project.pk)
+# Realtor Management Views
+
+@login_required
+def realtor_create(request, pk):
+    """Create new realtor for a project."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    next_url = request.GET.get('next', f'/projects/{project.pk}/visits/')
+    
+    if request.method == 'POST':
+        form = RealtorForm(request.POST)
+        if form.is_valid():
+            realtor = form.save(commit=False)
+            realtor.created_by = request.user
+            
+            try:
+                realtor.save()
+                messages.success(request, f'Realtor "{realtor.name}" created successfully!')
+                return redirect(next_url)
+            except Exception as e:
+                if 'UNIQUE constraint failed' in str(e):
+                    form.add_error('name', 'A realtor with this name already exists.')
+                else:
+                    messages.error(request, 'An error occurred while saving the realtor.')
+    else:
+        form = RealtorForm()
+    
+    context = {
+        'project': project,
+        'form': form,
+        'next_url': next_url,
+        'title': 'Add New Realtor'
+    }
+    return render(request, 'projects/realtor_create.html', context)
+
+
+# Realtor Management Views
+
+@login_required
+def realtor_list(request, pk):
+    """Display project realtors."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access to this project
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    realtors = project.realtors.all()
+    
+    context = {
+        'project': project,
+        'realtors': realtors,
+        'can_add': project.status == 'active',
+    }
+    return render(request, 'projects/realtor_list.html', context)
+
+
+@login_required
+def realtor_create(request, pk):
+    """Create new realtor for project."""
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Check if user has access and project is active
+    if not project.is_member(request.user):
+        messages.error(request, "You don't have access to this project.")
+        return redirect('projects:list')
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot add realtors to finished projects.")
+        return redirect('projects:realtor_list', pk=project.pk)
+    
+    if request.method == 'POST':
+        form = RealtorForm(request.POST)
+        if form.is_valid():
+            realtor = form.save(commit=False)
+            realtor.project = project
+            realtor.created_by = request.user
+            
+            try:
+                realtor.save()
+                messages.success(request, f'Realtor "{realtor.name}" added to project successfully!')
+                return redirect('projects:realtor_list', pk=project.pk)
+            except Exception as e:
+                if 'UNIQUE constraint failed' in str(e):
+                    form.add_error('name', 'A realtor with this name already exists in this project.')
+                else:
+                    messages.error(request, 'An error occurred while saving the realtor.')
+    else:
+        form = RealtorForm()
+    
+    context = {
+        'project': project,
+        'form': form,
+        'title': 'Add New Realtor'
+    }
+    return render(request, 'projects/realtor_form.html', context)
+
+
+@login_required
+def realtor_edit(request, pk, realtor_id):
+    """Edit existing realtor."""
+    project = get_object_or_404(Project, pk=pk)
+    realtor = get_object_or_404(Realtor, pk=realtor_id, project=project)
+    
+    # Check if user has access and can edit
+    if not realtor.can_be_edited_by(request.user):
+        messages.error(request, "You don't have permission to edit this realtor.")
+        return redirect('projects:realtor_list', pk=project.pk)
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot edit realtors in finished projects.")
+        return redirect('projects:realtor_list', pk=project.pk)
+    
+    if request.method == 'POST':
+        form = RealtorForm(request.POST, instance=realtor)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, f'Realtor "{realtor.name}" updated successfully!')
+                return redirect('projects:realtor_list', pk=project.pk)
+            except Exception as e:
+                if 'UNIQUE constraint failed' in str(e):
+                    form.add_error('name', 'A realtor with this name already exists in this project.')
+                else:
+                    messages.error(request, 'An error occurred while updating the realtor.')
+    else:
+        form = RealtorForm(instance=realtor)
+    
+    context = {
+        'project': project,
+        'realtor': realtor,
+        'form': form,
+        'title': f'Edit "{realtor.name}"'
+    }
+    return render(request, 'projects/realtor_form.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def realtor_delete(request, pk, realtor_id):
+    """Delete realtor."""
+    project = get_object_or_404(Project, pk=pk)
+    realtor = get_object_or_404(Realtor, pk=realtor_id, project=project)
+    
+    # Check if user has permission to delete
+    if not realtor.can_be_deleted_by(request.user):
+        messages.error(request, "You don't have permission to delete this realtor.")
+        return redirect('projects:realtor_list', pk=project.pk)
+    
+    if project.status != 'active':
+        messages.error(request, "Cannot delete realtors from finished projects.")
+        return redirect('projects:realtor_list', pk=project.pk)
+    
+    realtor_name = realtor.name
+    realtor.delete()
+    messages.success(request, f'Realtor "{realtor_name}" deleted successfully!')
+    
+    return redirect('projects:realtor_list', pk=project.pk)

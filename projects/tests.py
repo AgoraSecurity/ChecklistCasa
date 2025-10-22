@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from datetime import date
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation
+from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation, Realtor
 
 
 class ProjectModelTest(TestCase):
@@ -114,8 +114,6 @@ class VisitModelTest(TestCase):
             project=self.project,
             name='Test Property',
             address='123 Test St',
-            realtor_name='John Doe',
-            realtor_contact='john@test.com',
             visit_date=date.today(),
             notes='Test notes',
             created_by=self.user
@@ -563,8 +561,6 @@ class VisitManagementViewTest(TestCase):
             'name': 'Test Property',
             'address': '123 Test Street, Test City, TC 12345',
             'visit_date': date.today().isoformat(),
-            'realtor_name': 'John Doe',
-            'realtor_contact': 'john@test.com',
             'notes': 'Test notes'
         })
         self.assertEqual(response.status_code, 302)
@@ -602,8 +598,6 @@ class VisitFormTest(TestCase):
             'name': 'Test Property',
             'address': '123 Test Street, Test City, TC 12345',
             'visit_date': date.today(),
-            'realtor_name': 'John Doe',
-            'realtor_contact': 'john@test.com',
             'notes': 'Test notes'
         }
         form = VisitForm(data=form_data)

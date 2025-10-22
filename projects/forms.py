@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto
+from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, Realtor
 
 
 class RangeInput(forms.TextInput):
@@ -55,6 +55,48 @@ class ProjectInvitationForm(forms.Form):
         return email
 
 
+class RealtorForm(forms.ModelForm):
+    """Form for creating and editing realtors."""
+    
+    class Meta:
+        model = Realtor
+        fields = ['name', 'company', 'phone', 'email', 'notes']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Enter realtor name',
+                'maxlength': '100'
+            }),
+            'company': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Company name (optional)',
+                'maxlength': '100'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': '(555) 123-4567',
+                'maxlength': '20'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'email@example.com'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Additional notes about this realtor (optional)',
+                'rows': 3
+            })
+        }
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip()
+            if len(name) < 2:
+                raise forms.ValidationError("Realtor name must be at least 2 characters long.")
+        return name
+
+
 class CriteriaForm(forms.ModelForm):
     """Form for creating and editing criteria."""
     
@@ -101,44 +143,59 @@ class CriteriaForm(forms.ModelForm):
 class VisitForm(forms.ModelForm):
     """Form for creating and editing visits."""
     
+    # Add a custom field for realtor selection with "Add new" option
+    realtor_choice = forms.ChoiceField(
+        required=False,
+        label="Realtor/Agent",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'id': 'realtor-select'
+        })
+    )
+    
     class Meta:
         model = Visit
-        fields = ['name', 'address', 'realtor_name', 'realtor_contact', 'visit_date', 'notes']
+        fields = ['name', 'address', 'realtor', 'visit_date', 'notes']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
-                'placeholder': '🏠 Enter property name or identifier',
-                'maxlength': '200',
-                'autocomplete': 'off'
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Enter property name or identifier',
+                'maxlength': '200'
             }),
             'address': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all',
-                'placeholder': '📍 Enter full property address\n123 Main St, City, State 12345',
-                'rows': 3,
-                'autocomplete': 'street-address'
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Enter full property address',
+                'rows': 3
             }),
-            'realtor_name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
-                'placeholder': '👤 Realtor or agent name (optional)',
-                'maxlength': '100',
-                'autocomplete': 'name'
-            }),
-            'realtor_contact': TelInput(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
-                'placeholder': '📞 Phone number or email (optional)',
-                'maxlength': '100',
-                'autocomplete': 'tel'
+            'realtor': forms.Select(attrs={
+                'class': 'hidden'  # Hide the actual realtor field, we'll use realtor_choice
             }),
             'visit_date': forms.DateInput(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all',
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'type': 'date'
             }),
             'notes': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all',
-                'placeholder': '📝 Additional notes about the visit (optional)\n\nFirst impressions, things to remember, questions to ask...',
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Additional notes about the visit (optional)',
                 'rows': 4
             })
         }
+    
+    def __init__(self, project=None, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Set up realtor choices based on project
+        if project:
+            realtors = project.realtors.all().order_by('name')
+            choices = [('', 'No realtor selected')]
+            choices.extend([(r.id, str(r)) for r in realtors])
+            choices.append(('add_new', '+ Add new realtor'))
+            
+            self.fields['realtor_choice'].choices = choices
+            
+            # Set initial value if editing
+            if self.instance and self.instance.realtor:
+                self.fields['realtor_choice'].initial = self.instance.realtor.id
     
     def clean_name(self):
         name = self.cleaned_data.get('name')
@@ -150,7 +207,25 @@ class VisitForm(forms.ModelForm):
     
     def clean_address(self):
         address = self.cleaned_data.get('address')
+        if address:
+            address = address.strip()
+            if len(address) < 10:
+                raise forms.ValidationError("Please provide a complete address.")
         return address
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        realtor_choice = cleaned_data.get('realtor_choice')
+        
+        # Handle realtor selection
+        if realtor_choice and realtor_choice != 'add_new' and realtor_choice != '':
+            try:
+                realtor = Realtor.objects.get(id=realtor_choice)
+                cleaned_data['realtor'] = realtor
+            except Realtor.DoesNotExist:
+                pass
+        
+        return cleaned_data
 
 
 class VisitAssessmentForm(forms.Form):
@@ -207,24 +282,30 @@ class VisitAssessmentForm(forms.Form):
                     })
                 )
         
-        # Debug logging
+        # Debug logging (only in development)
         import logging
-        logger = logging.getLogger(__name__)
-        logger.debug(f"VisitAssessmentForm initialized with {criteria_count} criteria, {len(self.fields)} fields")
+        from django.conf import settings
+        if settings.DEBUG:
+            logger = logging.getLogger(__name__)
+            logger.debug(f"VisitAssessmentForm initialized with {criteria_count} criteria, {len(self.fields)} fields")
     
     def save_assessments(self, visit):
         """Save assessment data for the visit."""
         import logging
+        from django.conf import settings
         logger = logging.getLogger(__name__)
         
         assessments = []
-        logger.debug(f"Saving assessments for visit {visit.id}")
-        logger.debug(f"Cleaned data: {self.cleaned_data}")
+        if settings.DEBUG:
+            logger.debug(f"Saving assessments for visit {visit.id}")
+            logger.debug(f"Cleaned data: {self.cleaned_data}")
         
         for criteria in self.project.criteria.all():
             field_name = f'criteria_{criteria.id}'
             value = self.cleaned_data.get(field_name)
-            logger.debug(f"Processing {field_name} ({criteria.name}): {value}")
+            
+            if settings.DEBUG:
+                logger.debug(f"Processing {field_name} ({criteria.name}): {value}")
             
             if value is not None and value != '':
                 # Get or create assessment
@@ -235,7 +316,9 @@ class VisitAssessmentForm(forms.Form):
                 assessment.set_value(value)
                 assessment.save()
                 assessments.append(assessment)
-                logger.debug(f"Saved assessment for {criteria.name}: {assessment.get_value()}")
+                
+                if settings.DEBUG:
+                    logger.debug(f"Saved assessment for {criteria.name}: {assessment.get_value()}")
         
         logger.info(f"Saved {len(assessments)} assessments for visit {visit.id}")
         return assessments

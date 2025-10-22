@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation
+from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation, Realtor
 
 
 @admin.register(Project)
@@ -19,11 +19,19 @@ class CriteriaAdmin(admin.ModelAdmin):
     ordering = ['project', 'order']
 
 
+@admin.register(Realtor)
+class RealtorAdmin(admin.ModelAdmin):
+    list_display = ['name', 'company', 'phone', 'email', 'created_by', 'created_at']
+    list_filter = ['created_at', 'company']
+    search_fields = ['name', 'company', 'phone', 'email']
+    readonly_fields = ['created_at', 'updated_at']
+
+
 @admin.register(Visit)
 class VisitAdmin(admin.ModelAdmin):
-    list_display = ['name', 'project', 'visit_date', 'created_by', 'created_at']
-    list_filter = ['visit_date', 'project', 'created_at']
-    search_fields = ['name', 'address', 'project__name']
+    list_display = ['name', 'project', 'realtor', 'visit_date', 'created_by', 'created_at']
+    list_filter = ['visit_date', 'project', 'realtor', 'created_at']
+    search_fields = ['name', 'address', 'project__name', 'realtor__name']
     readonly_fields = ['created_at', 'updated_at']
 
 

@@ -10,6 +10,8 @@ inclusion: always
 - Add the relevant unit tests to the `test.py` file for the app. Create a new test file if needed.
 - Always run migrations after any model changes
 - Use `make` commands when available for consistency
+- Run all the tests and verify the are passing before finishing a task
+- **NEVER** use `uv run python manage.py shell` for quick testing
 
 ```bash
 # Required command patterns

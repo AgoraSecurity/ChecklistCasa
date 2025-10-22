@@ -104,31 +104,21 @@
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="{{ form.realtor_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Realtor/Agent Name
-                    </label>
-                    {{ form.realtor_name }}
-                    {% if form.realtor_name.errors %}
+            <div>
+                <label for="{{ form.realtor_choice.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.realtor_choice.label }}
+                </label>
+                <div class="relative">
+                    {{ form.realtor_choice }}
+                    {% if form.realtor_choice.errors %}
                         <div class="mt-1 text-sm text-red-600">
-                            {{ form.realtor_name.errors.0 }}
+                            {{ form.realtor_choice.errors.0 }}
                         </div>
                     {% endif %}
                 </div>
-                
-                <div>
-                    <label for="{{ form.realtor_contact.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Contact Info
-                    </label>
-                    {{ form.realtor_contact }}
-                    {% if form.realtor_contact.errors %}
-                        <div class="mt-1 text-sm text-red-600">
-                            {{ form.realtor_contact.errors.0 }}
-                        </div>
-                    {% endif %}
-                    <p class="mt-1 text-sm text-gray-500">Phone or email</p>
-                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                    Select a realtor from your list or add a new one
+                </p>
             </div>
             
             <div>
@@ -170,6 +160,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!dateInput.value) {
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
+    }
+    
+    // Handle realtor selection
+    const realtorSelect = document.getElementById('realtor-select');
+    if (realtorSelect) {
+        realtorSelect.addEventListener('change', function() {
+            if (this.value === 'add_new') {
+                // Submit the form to trigger the "Add new realtor" flow
+                this.form.submit();
+            }
+        });
     }
 });
 </script>

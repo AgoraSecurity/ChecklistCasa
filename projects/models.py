@@ -50,6 +50,64 @@ class Project(models.Model):
         return user == self.owner or self.collaborators.filter(id=user.id).exists()
 
 
+class Realtor(models.Model):
+    """
+    A realtor or agent associated with a specific project.
+    All project members can use realtors within their project.
+    """
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='realtors',
+        help_text="Project this realtor belongs to"
+    )
+    name = models.CharField(max_length=100)
+    company = models.CharField(max_length=100, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        help_text="User who added this realtor to the project"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+        unique_together = ['project', 'name']  # Prevent duplicate realtor names per project
+    
+    def __str__(self):
+        if self.company:
+            return f"{self.name} ({self.company})"
+        return self.name
+    
+    @property
+    def contact_info(self):
+        """Return formatted contact information."""
+        contacts = []
+        if self.phone:
+            contacts.append(self.phone)
+        if self.email:
+            contacts.append(self.email)
+        return " | ".join(contacts) if contacts else ""
+    
+    def can_be_edited_by(self, user):
+        """
+        Check if a user can edit this realtor.
+        Any project member can edit project realtors.
+        """
+        return self.project.is_member(user)
+    
+    def can_be_deleted_by(self, user):
+        """
+        Check if a user can delete this realtor.
+        Only the creator or project owner can delete realtors.
+        """
+        return user == self.created_by or user == self.project.owner
+
+
 class Criteria(models.Model):
     """
     Evaluation criteria for a project with different data types.
@@ -98,11 +156,12 @@ class Visit(models.Model):
     )
     name = models.CharField(max_length=200, help_text="Property name or identifier")
     address = models.TextField()
-    realtor_name = models.CharField(max_length=100, blank=True)
-    realtor_contact = models.CharField(
-        max_length=100, 
+    realtor = models.ForeignKey(
+        Realtor,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
-        help_text="Phone number or email"
+        help_text="Realtor or agent for this property"
     )
     visit_date = models.DateField()
     notes = models.TextField(blank=True)

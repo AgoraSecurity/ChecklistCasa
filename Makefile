@@ -6,7 +6,7 @@ dev:
 
 # Run tests
 test:
-	uv run python manage.py test
+	uv run python manage.py test projects.tests  
 
 # Run all linters and formatters
 lint:

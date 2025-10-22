@@ -28,4 +28,10 @@ urlpatterns = [
     path('<int:pk>/visits/<int:visit_id>/', views.visit_detail, name='visit_detail'),
     path('<int:pk>/visits/<int:visit_id>/edit/', views.visit_edit, name='visit_edit'),
     path('<int:pk>/visits/<int:visit_id>/delete/', views.visit_delete, name='visit_delete'),
+    
+    # Realtor management
+    path('<int:pk>/realtors/', views.realtor_list, name='realtor_list'),
+    path('<int:pk>/realtors/create/', views.realtor_create, name='realtor_create'),
+    path('<int:pk>/realtors/<int:realtor_id>/edit/', views.realtor_edit, name='realtor_edit'),
+    path('<int:pk>/realtors/<int:realtor_id>/delete/', views.realtor_delete, name='realtor_delete'),
 ]
