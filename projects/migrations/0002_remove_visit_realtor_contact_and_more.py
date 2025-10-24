@@ -8,41 +8,70 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('projects', '0001_initial'),
+        ("projects", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='visit',
-            name='realtor_contact',
+            model_name="visit",
+            name="realtor_contact",
         ),
         migrations.RemoveField(
-            model_name='visit',
-            name='realtor_name',
+            model_name="visit",
+            name="realtor_name",
         ),
         migrations.CreateModel(
-            name='Realtor',
+            name="Realtor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('company', models.CharField(blank=True, max_length=100)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(help_text='User who added this realtor to the project', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(help_text='Project this realtor belongs to', on_delete=django.db.models.deletion.CASCADE, related_name='realtors', to='projects.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("company", models.CharField(blank=True, max_length=100)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        help_text="User who added this realtor to the project",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        help_text="Project this realtor belongs to",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="realtors",
+                        to="projects.project",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['name'],
-                'unique_together': {('project', 'name')},
+                "ordering": ["name"],
+                "unique_together": {("project", "name")},
             },
         ),
         migrations.AddField(
-            model_name='visit',
-            name='realtor',
-            field=models.ForeignKey(blank=True, help_text='Realtor or agent for this property', null=True, on_delete=django.db.models.deletion.SET_NULL, to='projects.realtor'),
+            model_name="visit",
+            name="realtor",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Realtor or agent for this property",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="projects.realtor",
+            ),
         ),
     ]

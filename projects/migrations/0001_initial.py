@@ -18,103 +18,270 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('status', models.CharField(choices=[('active', 'Active'), ('finished', 'Finished')], default='active', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('finished_at', models.DateTimeField(blank=True, null=True)),
-                ('collaborators', models.ManyToManyField(blank=True, related_name='collaborated_projects', to=settings.AUTH_USER_MODEL)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_projects', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("active", "Active"), ("finished", "Finished")],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("finished_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "collaborators",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="collaborated_projects",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="owned_projects",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Criteria',
+            name="Criteria",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('type', models.CharField(choices=[('boolean', 'Yes/No'), ('numeric', 'Number'), ('text', 'Text'), ('rating', 'Rating 1-5')], max_length=20)),
-                ('weight', models.DecimalField(blank=True, decimal_places=2, help_text='Optional weight for this criteria (0.01-9.99)', max_digits=3, null=True)),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='criteria', to='projects.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("boolean", "Yes/No"),
+                            ("numeric", "Number"),
+                            ("text", "Text"),
+                            ("rating", "Rating 1-5"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "weight",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="Optional weight for this criteria (0.01-9.99)",
+                        max_digits=3,
+                        null=True,
+                    ),
+                ),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="criteria",
+                        to="projects.project",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Criteria',
-                'ordering': ['order', 'created_at'],
-                'unique_together': {('project', 'name')},
+                "verbose_name_plural": "Criteria",
+                "ordering": ["order", "created_at"],
+                "unique_together": {("project", "name")},
             },
         ),
         migrations.CreateModel(
-            name='Visit',
+            name="Visit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Property name or identifier', max_length=200)),
-                ('address', models.TextField()),
-                ('realtor_name', models.CharField(blank=True, max_length=100)),
-                ('realtor_contact', models.CharField(blank=True, help_text='Phone number or email', max_length=100)),
-                ('visit_date', models.DateField()),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visits', to='projects.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Property name or identifier", max_length=200
+                    ),
+                ),
+                ("address", models.TextField()),
+                ("realtor_name", models.CharField(blank=True, max_length=100)),
+                (
+                    "realtor_contact",
+                    models.CharField(
+                        blank=True, help_text="Phone number or email", max_length=100
+                    ),
+                ),
+                ("visit_date", models.DateField()),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="visits",
+                        to="projects.project",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-visit_date', '-created_at'],
+                "ordering": ["-visit_date", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='VisitPhoto',
+            name="VisitPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='visit_photos/')),
-                ('caption', models.CharField(blank=True, max_length=200)),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('visit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='projects.visit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("image", models.ImageField(upload_to="visit_photos/")),
+                ("caption", models.CharField(blank=True, max_length=200)),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "visit",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="photos",
+                        to="projects.visit",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order', 'uploaded_at'],
+                "ordering": ["order", "uploaded_at"],
             },
         ),
         migrations.CreateModel(
-            name='ProjectInvitation',
+            name="ProjectInvitation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254)),
-                ('token', models.UUIDField(default=uuid.uuid4, unique=True)),
-                ('accepted', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('accepted_at', models.DateTimeField(blank=True, null=True)),
-                ('invited_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invitations', to='projects.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254)),
+                ("token", models.UUIDField(default=uuid.uuid4, unique=True)),
+                ("accepted", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("accepted_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "invited_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="invitations",
+                        to="projects.project",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'unique_together': {('project', 'email')},
+                "ordering": ["-created_at"],
+                "unique_together": {("project", "email")},
             },
         ),
         migrations.CreateModel(
-            name='VisitAssessment',
+            name="VisitAssessment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('value_text', models.TextField(blank=True)),
-                ('value_numeric', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('value_boolean', models.BooleanField(blank=True, null=True)),
-                ('value_rating', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('criteria', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='projects.criteria')),
-                ('visit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assessments', to='projects.visit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("value_text", models.TextField(blank=True)),
+                (
+                    "value_numeric",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True
+                    ),
+                ),
+                ("value_boolean", models.BooleanField(blank=True, null=True)),
+                (
+                    "value_rating",
+                    models.IntegerField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(5),
+                        ],
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "criteria",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="projects.criteria",
+                    ),
+                ),
+                (
+                    "visit",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assessments",
+                        to="projects.visit",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['criteria__order'],
-                'unique_together': {('visit', 'criteria')},
+                "ordering": ["criteria__order"],
+                "unique_together": {("visit", "criteria")},
             },
         ),
     ]

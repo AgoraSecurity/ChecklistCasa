@@ -8,7 +8,7 @@ from .models import UserProfile
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
-    verbose_name_plural = 'Profile'
+    verbose_name_plural = "Profile"
 
 
 class UserAdmin(BaseUserAdmin):
@@ -22,7 +22,7 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'receive_confirmation_emails', 'created_at']
-    list_filter = ['receive_confirmation_emails', 'created_at']
-    search_fields = ['user__email', 'user__username']
-    readonly_fields = ['created_at', 'updated_at']
+    list_display = ["user", "receive_confirmation_emails", "created_at"]
+    list_filter = ["receive_confirmation_emails", "created_at"]
+    search_fields = ["user__email", "user__username"]
+    readonly_fields = ["created_at", "updated_at"]

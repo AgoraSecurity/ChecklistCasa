@@ -10,39 +10,32 @@ class Project(models.Model):
     """
     A project represents a housing search with criteria and visits.
     """
+
     STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('finished', 'Finished'),
+        ("active", "Active"),
+        ("finished", "Finished"),
     ]
 
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='owned_projects'
+        User, on_delete=models.CASCADE, related_name="owned_projects"
     )
     collaborators = models.ManyToManyField(
-        User,
-        related_name='collaborated_projects',
-        blank=True
+        User, related_name="collaborated_projects", blank=True
     )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='active'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     created_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.name
 
     def finish_project(self):
         """Mark project as finished and set timestamp."""
-        self.status = 'finished'
+        self.status = "finished"
         self.finished_at = timezone.now()
         self.save()
 
@@ -56,11 +49,12 @@ class Realtor(models.Model):
     A realtor or agent associated with a specific project.
     All project members can use realtors within their project.
     """
+
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        related_name='realtors',
-        help_text="Project this realtor belongs to"
+        related_name="realtors",
+        help_text="Project this realtor belongs to",
     )
     name = models.CharField(max_length=100)
     company = models.CharField(max_length=100, blank=True)
@@ -70,14 +64,17 @@ class Realtor(models.Model):
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        help_text="User who added this realtor to the project"
+        help_text="User who added this realtor to the project",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['name']
-        unique_together = ['project', 'name']  # Prevent duplicate realtor names per project
+        ordering = ["name"]
+        unique_together = [
+            "project",
+            "name",
+        ]  # Prevent duplicate realtor names per project
 
     def __str__(self):
         if self.company:
@@ -113,17 +110,16 @@ class Criteria(models.Model):
     """
     Evaluation criteria for a project with different data types.
     """
+
     TYPE_CHOICES = [
-        ('boolean', 'Yes/No'),
-        ('numeric', 'Number'),
-        ('text', 'Text'),
-        ('rating', 'Rating 1-5'),
+        ("boolean", "Yes/No"),
+        ("numeric", "Number"),
+        ("text", "Text"),
+        ("rating", "Rating 1-5"),
     ]
 
     project = models.ForeignKey(
-        Project,
-        on_delete=models.CASCADE,
-        related_name='criteria'
+        Project, on_delete=models.CASCADE, related_name="criteria"
     )
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
@@ -132,15 +128,15 @@ class Criteria(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Optional weight for this criteria (0.01-9.99)"
+        help_text="Optional weight for this criteria (0.01-9.99)",
     )
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['order', 'created_at']
-        verbose_name_plural = 'Criteria'
-        unique_together = ['project', 'name']
+        ordering = ["order", "created_at"]
+        verbose_name_plural = "Criteria"
+        unique_together = ["project", "name"]
 
     def __str__(self):
         return f"{self.project.name} - {self.name}"
@@ -150,10 +146,9 @@ class Visit(models.Model):
     """
     A visit to a specific property for evaluation.
     """
+
     project = models.ForeignKey(
-        Project,
-        on_delete=models.CASCADE,
-        related_name='visits'
+        Project, on_delete=models.CASCADE, related_name="visits"
     )
     name = models.CharField(max_length=200, help_text="Property name or identifier")
     address = models.TextField()
@@ -162,7 +157,7 @@ class Visit(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Realtor or agent for this property"
+        help_text="Realtor or agent for this property",
     )
     visit_date = models.DateField()
     notes = models.TextField(blank=True)
@@ -171,7 +166,7 @@ class Visit(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-visit_date', '-created_at']
+        ordering = ["-visit_date", "-created_at"]
 
     def __str__(self):
         return f"{self.name} - {self.visit_date}"
@@ -181,45 +176,39 @@ class VisitAssessment(models.Model):
     """
     Assessment of a visit against specific criteria with polymorphic value storage.
     """
+
     visit = models.ForeignKey(
-        Visit,
-        on_delete=models.CASCADE,
-        related_name='assessments'
+        Visit, on_delete=models.CASCADE, related_name="assessments"
     )
     criteria = models.ForeignKey(Criteria, on_delete=models.CASCADE)
 
     # Polymorphic value storage based on criteria type
     value_text = models.TextField(blank=True)
     value_numeric = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True
+        max_digits=10, decimal_places=2, null=True, blank=True
     )
     value_boolean = models.BooleanField(null=True, blank=True)
     value_rating = models.IntegerField(
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['visit', 'criteria']
-        ordering = ['criteria__order']
+        unique_together = ["visit", "criteria"]
+        ordering = ["criteria__order"]
 
     def __str__(self):
         return f"{self.visit.name} - {self.criteria.name}"
 
     def get_value(self):
         """Get the appropriate value based on criteria type."""
-        if self.criteria.type == 'boolean':
+        if self.criteria.type == "boolean":
             return self.value_boolean
-        elif self.criteria.type == 'numeric':
+        elif self.criteria.type == "numeric":
             return self.value_numeric
-        elif self.criteria.type == 'rating':
+        elif self.criteria.type == "rating":
             return self.value_rating
         else:  # text
             return self.value_text
@@ -227,38 +216,35 @@ class VisitAssessment(models.Model):
     def set_value(self, value):
         """Set the appropriate value based on criteria type."""
         # Clear all values first
-        self.value_text = ''
+        self.value_text = ""
         self.value_numeric = None
         self.value_boolean = None
         self.value_rating = None
 
         # Set the appropriate value
-        if self.criteria.type == 'boolean':
+        if self.criteria.type == "boolean":
             self.value_boolean = bool(value) if value is not None else None
-        elif self.criteria.type == 'numeric':
+        elif self.criteria.type == "numeric":
             self.value_numeric = float(value) if value is not None else None
-        elif self.criteria.type == 'rating':
+        elif self.criteria.type == "rating":
             self.value_rating = int(value) if value is not None else None
         else:  # text
-            self.value_text = str(value) if value is not None else ''
+            self.value_text = str(value) if value is not None else ""
 
 
 class VisitPhoto(models.Model):
     """
     Photos associated with a visit.
     """
-    visit = models.ForeignKey(
-        Visit,
-        on_delete=models.CASCADE,
-        related_name='photos'
-    )
-    image = models.ImageField(upload_to='visit_photos/')
+
+    visit = models.ForeignKey(Visit, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to="visit_photos/")
     caption = models.CharField(max_length=200, blank=True)
     order = models.PositiveIntegerField(default=0)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['order', 'uploaded_at']
+        ordering = ["order", "uploaded_at"]
 
     def __str__(self):
         return f"{self.visit.name} - Photo {self.order + 1}"
@@ -268,10 +254,9 @@ class ProjectInvitation(models.Model):
     """
     Invitations to collaborate on a project.
     """
+
     project = models.ForeignKey(
-        Project,
-        on_delete=models.CASCADE,
-        related_name='invitations'
+        Project, on_delete=models.CASCADE, related_name="invitations"
     )
     email = models.EmailField()
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -281,8 +266,8 @@ class ProjectInvitation(models.Model):
     accepted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ['project', 'email']
-        ordering = ['-created_at']
+        unique_together = ["project", "email"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         status = "Accepted" if self.accepted else "Pending"

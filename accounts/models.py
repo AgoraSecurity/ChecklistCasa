@@ -7,10 +7,10 @@ from django.dispatch import receiver
 class UserProfile(models.Model):
     """User profile with email preferences."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     receive_confirmation_emails = models.BooleanField(
         default=True,
-        help_text="Receive confirmation emails when uploading home information"
+        help_text="Receive confirmation emails when uploading home information",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -29,7 +29,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """Save user profile when user is saved."""
-    if hasattr(instance, 'profile'):
+    if hasattr(instance, "profile"):
         instance.profile.save()
     else:
         UserProfile.objects.create(user=instance)
