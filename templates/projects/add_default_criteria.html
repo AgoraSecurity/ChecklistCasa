@@ -1,131 +1,127 @@
 {% extends 'base.html' %}
-
 {% block title %}Add Default Criteria - {{ project.name }} - Housing Evaluation System{% endblock %}
-
 {% block content %}
-<div class="mb-8">
-    <a href="{% url 'projects:criteria_list' project.pk %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Criteria
-    </a>
-    
-    <h1 class="text-3xl font-bold text-gray-900">Add Default Criteria</h1>
-    <p class="text-gray-600 mt-2">{{ project.name }}</p>
-</div>
-
-<div class="max-w-4xl">
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-2">Choose a Template</h2>
-            <p class="text-gray-600">
-                Select a pre-built template that matches your housing evaluation needs. 
-                You can always customize or add more criteria later.
-            </p>
-        </div>
-        
-        <form method="post" class="space-y-6">
-            {% csrf_token %}
-            
-            <div>
-                <label for="{{ form.template.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-3">
-                    Template Type
-                </label>
-                {{ form.template }}
-                {% if form.template.errors %}
-                    <div class="mt-2 text-sm text-red-600">
-                        {{ form.template.errors.0 }}
-                    </div>
-                {% endif %}
-                <p class="mt-2 text-sm text-gray-500">{{ form.template.help_text }}</p>
-            </div>
-            
-            <!-- Template Descriptions -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-gray-900 mb-3">Template Details</h3>
-                <div class="space-y-4 text-sm text-gray-600">
-                    <div class="template-info" data-template="basic_housing">
-                        <h4 class="font-medium text-gray-900">Basic Housing Evaluation</h4>
-                        <p>Essential criteria for any housing search including rent/price, location, safety, and basic amenities.</p>
-                        <p class="text-xs mt-1">Includes: Monthly cost, distance to work, transportation, safety rating, condition, parking, pet policy, and notes.</p>
-                    </div>
-                    
-                    <div class="template-info hidden" data-template="rental_apartment">
-                        <h4 class="font-medium text-gray-900">Rental Apartment</h4>
-                        <p>Comprehensive criteria for apartment rentals including costs, space, and amenities.</p>
-                        <p class="text-xs mt-1">Includes: Rent, deposit, square footage, bedrooms/bathrooms, laundry, AC, balcony, amenities, and noise level.</p>
-                    </div>
-                    
-                    <div class="template-info hidden" data-template="home_purchase">
-                        <h4 class="font-medium text-gray-900">Home Purchase</h4>
-                        <p>Detailed criteria for buying a home including purchase costs, property details, and investment factors.</p>
-                        <p class="text-xs mt-1">Includes: Purchase price, taxes, HOA fees, size, lot, age, schools, condition, garage, and repair needs.</p>
-                    </div>
-                    
-                    <div class="template-info hidden" data-template="student_housing">
-                        <h4 class="font-medium text-gray-900">Student Housing</h4>
-                        <p>Student-focused criteria emphasizing proximity to campus, study environment, and budget considerations.</p>
-                        <p class="text-xs mt-1">Includes: Rent, campus distance, internet, study space, roommates, kitchen, furnished status, utilities, and social environment.</p>
-                    </div>
-                    
-                    <div class="template-info hidden" data-template="family_home">
-                        <h4 class="font-medium text-gray-900">Family Home</h4>
-                        <p>Family-oriented criteria focusing on schools, safety, space, and child-friendly features.</p>
-                        <p class="text-xs mt-1">Includes: Price, bedrooms/bathrooms, school ratings, school distance, yard space, safety, playgrounds, amenities, and storage.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-yellow-800">
-                        Note about existing criteria
-                    </h3>
-                    <div class="mt-2 text-sm text-yellow-700">
-                        <p>Only criteria that don't already exist in your project will be added. Duplicate criteria names will be skipped.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <a href="{% url 'projects:criteria_list' project.pk %}" 
-                   class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Add Template Criteria
-                </button>
-            </div>
-        </form>
+    <div class="mb-8">
+        <a href="{% url 'projects:criteria_list' project.pk %}"
+           class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+            <svg class="w-4 h-4 mr-2"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Criteria
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900">Add Default Criteria</h1>
+        <p class="text-gray-600 mt-2">{{ project.name }}</p>
     </div>
-</div>
+    <div class="max-w-4xl">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Choose a Template</h2>
+                <p class="text-gray-600">
+                    Select a pre-built template that matches your housing evaluation needs.
+                    You can always customize or add more criteria later.
+                </p>
+            </div>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="{{ form.template.id_for_label }}"
+                           class="block text-sm font-medium text-gray-700 mb-3">Template Type</label>
+                    {{ form.template }}
+                    {% if form.template.errors %}<div class="mt-2 text-sm text-red-600">{{ form.template.errors.0 }}</div>{% endif %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.template.help_text }}</p>
+                </div>
+                <!-- Template Descriptions -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-900 mb-3">Template Details</h3>
+                    <div class="space-y-4 text-sm text-gray-600">
+                        <div class="template-info" data-template="basic_housing">
+                            <h4 class="font-medium text-gray-900">Basic Housing Evaluation</h4>
+                            <p>Essential criteria for any housing search including rent/price, location, safety, and basic amenities.</p>
+                            <p class="text-xs mt-1">
+                                Includes: Monthly cost, distance to work, transportation, safety rating, condition, parking, pet policy, and notes.
+                            </p>
+                        </div>
+                        <div class="template-info hidden" data-template="rental_apartment">
+                            <h4 class="font-medium text-gray-900">Rental Apartment</h4>
+                            <p>Comprehensive criteria for apartment rentals including costs, space, and amenities.</p>
+                            <p class="text-xs mt-1">
+                                Includes: Rent, deposit, square footage, bedrooms/bathrooms, laundry, AC, balcony, amenities, and noise level.
+                            </p>
+                        </div>
+                        <div class="template-info hidden" data-template="home_purchase">
+                            <h4 class="font-medium text-gray-900">Home Purchase</h4>
+                            <p>Detailed criteria for buying a home including purchase costs, property details, and investment factors.</p>
+                            <p class="text-xs mt-1">
+                                Includes: Purchase price, taxes, HOA fees, size, lot, age, schools, condition, garage, and repair needs.
+                            </p>
+                        </div>
+                        <div class="template-info hidden" data-template="student_housing">
+                            <h4 class="font-medium text-gray-900">Student Housing</h4>
+                            <p>Student-focused criteria emphasizing proximity to campus, study environment, and budget considerations.</p>
+                            <p class="text-xs mt-1">
+                                Includes: Rent, campus distance, internet, study space, roommates, kitchen, furnished status, utilities, and social environment.
+                            </p>
+                        </div>
+                        <div class="template-info hidden" data-template="family_home">
+                            <h4 class="font-medium text-gray-900">Family Home</h4>
+                            <p>Family-oriented criteria focusing on schools, safety, space, and child-friendly features.</p>
+                            <p class="text-xs mt-1">
+                                Includes: Price, bedrooms/bathrooms, school ratings, school distance, yard space, safety, playgrounds, amenities, and storage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400"
+                                 fill="currentColor"
+                                 viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">Note about existing criteria</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>Only criteria that don't already exist in your project will be added. Duplicate criteria names will be skipped.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                        <a href="{% url 'projects:criteria_list' project.pk %}"
+                           class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            Add Template Criteria
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const templateSelect = document.getElementById('{{ form.template.id_for_label }}');
+                const templateInfos = document.querySelectorAll('.template-info');
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const templateSelect = document.getElementById('{{ form.template.id_for_label }}');
-    const templateInfos = document.querySelectorAll('.template-info');
-    
-    function showTemplateInfo() {
-        const selectedValue = templateSelect.value;
-        templateInfos.forEach(info => {
-            if (info.dataset.template === selectedValue) {
-                info.classList.remove('hidden');
-            } else {
-                info.classList.add('hidden');
-            }
-        });
-    }
-    
-    templateSelect.addEventListener('change', showTemplateInfo);
-    showTemplateInfo(); // Show initial selection
-});
-</script>
-{% endblock %}
+                function showTemplateInfo() {
+                    const selectedValue = templateSelect.value;
+                    templateInfos.forEach(info => {
+                        if (info.dataset.template === selectedValue) {
+                            info.classList.remove('hidden');
+                        } else {
+                            info.classList.add('hidden');
+                        }
+                    });
+                }
+
+                templateSelect.addEventListener('change', showTemplateInfo);
+                showTemplateInfo(); // Show initial selection
+            });
+        </script>
+    {% endblock %}

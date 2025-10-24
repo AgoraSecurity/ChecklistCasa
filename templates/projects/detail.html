@@ -1,392 +1,445 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ project.name }} - Housing Evaluation System{% endblock %}
-
 {% block content %}
-<div class="mb-8">
-    <a href="{% url 'projects:list' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Projects
-    </a>
-    
-    <div class="flex justify-between items-start">
-        <div>
-            <div class="flex items-center space-x-3 mb-2">
-                <h1 class="text-3xl font-bold text-gray-900">{{ project.name }}</h1>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                           {% if project.status == 'active' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                    {% if project.status == 'active' %}
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+    <div class="mb-8">
+        <a href="{% url 'projects:list' %}"
+           class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+            <svg class="w-4 h-4 mr-2"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Projects
+        </a>
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="flex items-center space-x-3 mb-2">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ project.name }}</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {% if project.status == 'active' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if project.status == 'active' %}
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd">
+                                </path>
+                            </svg>
+                            Active
+                        {% else %}
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd">
+                                </path>
+                            </svg>
+                            Finished
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                            </path>
                         </svg>
-                        Active
-                    {% else %}
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        Owner: {{ project.owner.email }}
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
                         </svg>
-                        Finished
+                        Created {{ project.created_at|date:"M j, Y" }}
+                    </div>
+                    {% if project.status == 'finished' %}
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-2"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            Finished {{ project.finished_at|date:"M j, Y" }}
+                        </div>
                     {% endif %}
-                </span>
+                </div>
             </div>
-            <div class="flex items-center space-x-6 text-sm text-gray-600">
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    Owner: {{ project.owner.email }}
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Created {{ project.created_at|date:"M j, Y" }}
-                </div>
-                {% if project.status == 'finished' %}
-                    <div class="flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            {% if is_owner and project.status == 'active' %}
+                <div class="flex space-x-3">
+                    <a href="{% url 'projects:edit' project.pk %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 mr-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            </path>
                         </svg>
-                        Finished {{ project.finished_at|date:"M j, Y" }}
-                    </div>
-                {% endif %}
-            </div>
+                        Edit
+                    </a>
+                    <form method="post"
+                          action="{% url 'projects:finish' project.pk %}"
+                          class="inline-block"
+                          onsubmit="return confirm('Are you sure you want to finish this project? This action cannot be undone and will make the project read-only.')">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+                            <svg class="w-4 h-4 mr-2"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Finish Project
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
         </div>
-        
-        {% if is_owner and project.status == 'active' %}
-            <div class="flex space-x-3">
-                <a href="{% url 'projects:edit' project.pk %}" 
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+    </div>
+    <!-- Prominent Log Visit CTA -->
+    {% if project.status == 'active' %}
+        <div class="mb-6">
+            {% if project.criteria.count %}
+                <a href="{% url 'projects:visit_create' project.pk %}"
+                   class="w-full lg:w-auto inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md text-xl transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                   role="button"
+                   aria-label="Log Visit"
+                   title="Log a new visit">
+                    <svg class="w-5 h-5 mr-3"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Edit
+                    Log Visit
                 </a>
-                <form method="post" action="{% url 'projects:finish' project.pk %}" class="inline-block"
-                      onsubmit="return confirm('Are you sure you want to finish this project? This action cannot be undone and will make the project read-only.')">
-                    {% csrf_token %}
-                    <button type="submit" 
-                            class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Finish Project
-                    </button>
-                </form>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Prominent Log Visit CTA -->
-{% if project.status == 'active' %}
-    <div class="mb-6">
-        {% if project.criteria.count %}
-            <a href="{% url 'projects:visit_create' project.pk %}"
-               class="w-full lg:w-auto inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md text-xl transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-               role="button"
-               aria-label="Log Visit"
-               title="Log a new visit">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Log Visit
-            </a>
-        {% else %}
-            <!-- If no criteria exist, guide user to create criteria first -->
-            <a href="{% url 'projects:criteria_list' project.pk %}"
-               class="w-full lg:w-auto inline-flex items-center justify-center bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg border border-gray-300 shadow-sm text-lg hover:bg-gray-100 transition"
-               role="button"
-               aria-label="Add criteria"
-               title="Add criteria before logging visits">
-                <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 0v4m0-4h4m-4 0H8"></path>
-                </svg>
-                Add criteria to enable logging visits
-            </a>
-        {% endif %}
-    </div>
-{% endif %}
-
-<!-- Project Stats -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            {% else %}
+                <!-- If no criteria exist, guide user to create criteria first -->
+                <a href="{% url 'projects:criteria_list' project.pk %}"
+                   class="w-full lg:w-auto inline-flex items-center justify-center bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg border border-gray-300 shadow-sm text-lg hover:bg-gray-100 transition"
+                   role="button"
+                   aria-label="Add criteria"
+                   title="Add criteria before logging visits">
+                    <svg class="w-5 h-5 mr-3 text-gray-600"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 0v4m0-4h4m-4 0H8"></path>
                     </svg>
-                </div>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Criteria</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ project.criteria.count }}</p>
-            </div>
+                    Add criteria to enable logging visits
+                </a>
+            {% endif %}
         </div>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Visits</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ project.visits.count }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.196M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Members</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ collaborators.count|add:1 }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Pending Invites</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ pending_invitations.count }}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Main Content Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Left Column - Project Actions -->
-    <div class="lg:col-span-2 space-y-6">
-        <!-- Quick Actions -->
+    {% endif %}
+    <!-- Project Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {% if project.status == 'active' %}
-                    <a href="{% url 'projects:criteria_list' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">Manage Criteria</p>
-                            <p class="text-sm text-gray-500">Define evaluation parameters</p>
-                        </div>
-                    </a>
-                    
-                    <a href="{% url 'projects:realtor_list' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">View Realtors</p>
-                            <p class="text-sm text-gray-500">View all your realtors</p>
-                        </div>
-                    </a>
-                {% endif %}
-                
-                <a href="{% url 'projects:visit_list' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                            </path>
+                        </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900">View All Visits</p>
-                        <p class="text-sm text-gray-500">See all property evaluations</p>
-                    </div>
-                </a>
-                
-                <a href="{% url 'projects:comparison_table' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900">Compare Properties</p>
-                        <p class="text-sm text-gray-500">View side-by-side comparison</p>
-                    </div>
-                </a>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Criteria</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ project.criteria.count }}</p>
+                </div>
             </div>
         </div>
-
-        <!-- Recent Visits -->
-        {% if project.visits.exists %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Visits</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ project.visits.count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-600"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.196M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Members</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ collaborators.count|add:1 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-600"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Pending Invites</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ pending_invitations.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column - Project Actions -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Recent Visits</h2>
-                    <a href="{% url 'projects:visit_list' project.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All</a>
-                </div>
-                <div class="space-y-4">
-                    {% for visit in project.visits.all|slice:":3" %}
-                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                            <div>
-                                <h3 class="font-medium text-gray-900">{{ visit.name }}</h3>
-                                <p class="text-sm text-gray-500">{{ visit.address|truncatechars:50 }}</p>
-                                <p class="text-xs text-gray-400">Visited {{ visit.visit_date|date:"M j, Y" }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs text-gray-500">{{ visit.assessments.count }} assessments</span>
-                                <a href="{% url 'projects:visit_detail' project.pk visit.pk %}" class="text-blue-600 hover:text-blue-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% if project.status == 'active' %}
+                        <a href="{% url 'projects:criteria_list' project.pk %}"
+                           class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-600"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                        </path>
                                     </svg>
-                                </a>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Manage Criteria</p>
+                                <p class="text-sm text-gray-500">Define evaluation parameters</p>
+                            </div>
+                        </a>
+                        <a href="{% url 'projects:realtor_list' project.pk %}"
+                           class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">View Realtors</p>
+                                <p class="text-sm text-gray-500">View all your realtors</p>
+                            </div>
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'projects:visit_list' project.pk %}"
+                       class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-600"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
                             </div>
                         </div>
-                    {% endfor %}
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">View All Visits</p>
+                            <p class="text-sm text-gray-500">See all property evaluations</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'projects:comparison_table' project.pk %}"
+                       class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-orange-600"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Compare Properties</p>
+                            <p class="text-sm text-gray-500">View side-by-side comparison</p>
+                        </div>
+                    </a>
                 </div>
             </div>
-        {% endif %}
-    </div>
-
-    <!-- Right Column - Team Management -->
-    <div class="space-y-6">
-        <!-- Team Members -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Team Members</h2>
-            
-            <!-- Owner -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="text-sm font-medium text-blue-600">
-                                {{ project.owner.email|first|upper }}
-                            </span>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">{{ project.owner.email }}</p>
-                            <p class="text-xs text-gray-500">Owner</p>
-                        </div>
+            <!-- Recent Visits -->
+            {% if project.visits.exists %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Recent Visits</h2>
+                        <a href="{% url 'projects:visit_list' project.pk %}"
+                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All</a>
+                    </div>
+                    <div class="space-y-4">
+                        {% for visit in project.visits.all|slice:":3" %}
+                            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                <div>
+                                    <h3 class="font-medium text-gray-900">{{ visit.name }}</h3>
+                                    <p class="text-sm text-gray-500">{{ visit.address|truncatechars:50 }}</p>
+                                    <p class="text-xs text-gray-400">Visited {{ visit.visit_date|date:"M j, Y" }}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs text-gray-500">{{ visit.assessments.count }} assessments</span>
+                                    <a href="{% url 'projects:visit_detail' project.pk visit.pk %}"
+                                       class="text-blue-600 hover:text-blue-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-                
-                <!-- Collaborators -->
-                {% for collaborator in collaborators %}
+            {% endif %}
+        </div>
+        <!-- Right Column - Team Management -->
+        <div class="space-y-6">
+            <!-- Team Members -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Team Members</h2>
+                <!-- Owner -->
+                <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <span class="text-sm font-medium text-gray-600">
-                                    {{ collaborator.email|first|upper }}
-                                </span>
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="text-sm font-medium text-blue-600">{{ project.owner.email|first|upper }}</span>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">{{ collaborator.email }}</p>
-                                <p class="text-xs text-gray-500">Collaborator</p>
+                                <p class="text-sm font-medium text-gray-900">{{ project.owner.email }}</p>
+                                <p class="text-xs text-gray-500">Owner</p>
                             </div>
                         </div>
-                        {% if is_owner and project.status == 'active' %}
-                            <form method="post" action="{% url 'projects:remove_collaborator' project.pk collaborator.pk %}" class="inline-block"
-                                  onsubmit="return confirm('Are you sure you want to remove {{ collaborator.email }} from this project?')">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:text-red-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </form>
-                        {% endif %}
                     </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Invite Collaborators -->
-        {% if is_owner and project.status == 'active' %}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Invite Collaborators</h2>
-                <form method="post" action="{% url 'projects:send_invitation' project.pk %}" class="space-y-4">
-                    {% csrf_token %}
-                    <div>
-                        {{ invitation_form.email }}
-                        <p class="mt-1 text-sm text-gray-500">{{ invitation_form.email.help_text }}</p>
-                    </div>
-                    <button type="submit" 
-                            class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                        Send Invitation
-                    </button>
-                </form>
-            </div>
-        {% endif %}
-
-        <!-- Pending Invitations -->
-        {% if is_owner and pending_invitations %}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Pending Invitations</h2>
-                <div class="space-y-3">
-                    {% for invitation in pending_invitations %}
+                    <!-- Collaborators -->
+                    {% for collaborator in collaborators %}
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ invitation.email }}</p>
-                                <p class="text-xs text-gray-500">Sent {{ invitation.created_at|date:"M j, Y" }}</p>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">{{ collaborator.email|first|upper }}</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">{{ collaborator.email }}</p>
+                                    <p class="text-xs text-gray-500">Collaborator</p>
+                                </div>
                             </div>
-                            <form method="post" action="{% url 'projects:cancel_invitation' project.pk invitation.pk %}" class="inline-block"
-                                  onsubmit="return confirm('Are you sure you want to cancel the invitation to {{ invitation.email }}?')">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                    Cancel
-                                </button>
-                            </form>
+                            {% if is_owner and project.status == 'active' %}
+                                <form method="post"
+                                      action="{% url 'projects:remove_collaborator' project.pk collaborator.pk %}"
+                                      class="inline-block"
+                                      onsubmit="return confirm('Are you sure you want to remove {{ collaborator.email }} from this project?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-600 hover:text-red-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
             </div>
-        {% endif %}
-
-        {% if project.status == 'finished' %}
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                        </svg>
+            <!-- Invite Collaborators -->
+            {% if is_owner and project.status == 'active' %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Invite Collaborators</h2>
+                    <form method="post"
+                          action="{% url 'projects:send_invitation' project.pk %}"
+                          class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            {{ invitation_form.email }}
+                            <p class="mt-1 text-sm text-gray-500">{{ invitation_form.email.help_text }}</p>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Send Invitation
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+            <!-- Pending Invitations -->
+            {% if is_owner and pending_invitations %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Pending Invitations</h2>
+                    <div class="space-y-3">
+                        {% for invitation in pending_invitations %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ invitation.email }}</p>
+                                    <p class="text-xs text-gray-500">Sent {{ invitation.created_at|date:"M j, Y" }}</p>
+                                </div>
+                                <form method="post"
+                                      action="{% url 'projects:cancel_invitation' project.pk invitation.pk %}"
+                                      class="inline-block"
+                                      onsubmit="return confirm('Are you sure you want to cancel the invitation to {{ invitation.email }}?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm">Cancel</button>
+                                </form>
+                            </div>
+                        {% endfor %}
                     </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">
-                            Project Finished
-                        </h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <p>This project has been finished and is now read-only. No new visits, criteria, or collaborators can be added.</p>
+                </div>
+            {% endif %}
+            {% if project.status == 'finished' %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400"
+                                 fill="currentColor"
+                                 viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">Project Finished</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>This project has been finished and is now read-only. No new visits, criteria, or collaborators can be added.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
     </div>
-</div>
 {% endblock %}

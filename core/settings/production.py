@@ -3,6 +3,7 @@ Production settings for Housing Evaluation System.
 """
 
 import os
+
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -28,7 +29,14 @@ SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'server@checklist.casa')
 EMAIL_TIMEOUT = 30
 
 # Static files configuration for production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files security

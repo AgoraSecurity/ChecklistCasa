@@ -1,0 +1,68 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    -   id: check-ast
+    -   id: check-json
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: check-added-large-files
+    -   id: check-merge-conflict
+    -   id: debug-statements
+-   repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+    -   id: black
+- repo: https://github.com/PyCQA/flake8
+  rev: 7.0.0
+  hooks:
+  -   id: flake8
+      name: flake8
+      types: [python]
+      args:
+      -   --ignore=E501,E121,E123,E126,E226,E24,E704,W503,W504
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+    - id: isort
+      name: isort (python)
+      args: ["--profile", "black", "--filter-files"]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.8.0
+  hooks:
+    - id: mypy
+      additional_dependencies: [types-requests, django-stubs]
+      args: ["--ignore-missing-imports", "--no-strict-optional"]
+- repo: https://github.com/djlint/djLint
+  rev: v1.36.4
+  hooks:
+    - id: djlint
+      name: djLint (Django/Jinja HTML linter)
+      entry: djlint --reformat --check
+- repo: https://github.com/adamchainz/django-upgrade
+  rev: 1.16.0
+  hooks:
+    - id: django-upgrade
+      args: [--target-version, "5.0"]
+- repo: local
+  hooks:
+    - id: django-check
+      name: Django Check
+      entry: make check
+      language: system
+      pass_filenames: false
+- repo: local
+  hooks:
+    - id: django-migrations-check
+      name: Django Migrations Check
+      entry: make migrate
+      language: system
+      pass_filenames: false
+- repo: local
+  hooks:
+    - id: django-tests
+      name: Django Tests
+      entry: make test
+      language: system
+      pass_filenames: false

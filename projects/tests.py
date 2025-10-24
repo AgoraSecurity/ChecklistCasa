@@ -1,10 +1,20 @@
-from django.test import TestCase
+from datetime import date
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.test import TestCase
 from django.urls import reverse
-from datetime import date
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation, Realtor
+
+from .models import (
+    Criteria,
+    Project,
+    ProjectInvitation,
+    Realtor,
+    Visit,
+    VisitAssessment,
+    VisitPhoto,
+)
 
 
 class ProjectModelTest(TestCase):
@@ -46,10 +56,10 @@ class ProjectModelTest(TestCase):
             owner=self.user
         )
         project.collaborators.add(self.collaborator)
-        
+
         self.assertTrue(project.is_member(self.user))
         self.assertTrue(project.is_member(self.collaborator))
-        
+
         other_user = User.objects.create_user(
             username='other',
             email='other@example.com',
@@ -89,7 +99,7 @@ class CriteriaModelTest(TestCase):
             name='Duplicate Name',
             type='boolean'
         )
-        
+
         with self.assertRaises(IntegrityError):
             Criteria.objects.create(
                 project=self.project,
@@ -155,7 +165,7 @@ class VisitAssessmentModelTest(TestCase):
         )
         assessment.set_value(True)
         assessment.save()
-        
+
         self.assertTrue(assessment.get_value())
         self.assertTrue(assessment.value_boolean)
 
@@ -171,7 +181,7 @@ class VisitAssessmentModelTest(TestCase):
         )
         assessment.set_value(2500.50)
         assessment.save()
-        
+
         self.assertEqual(assessment.get_value(), 2500.50)
         self.assertEqual(assessment.value_numeric, 2500.50)
 
@@ -187,7 +197,7 @@ class VisitAssessmentModelTest(TestCase):
         )
         assessment.set_value(4)
         assessment.save()
-        
+
         self.assertEqual(assessment.get_value(), 4)
         self.assertEqual(assessment.value_rating, 4)
 
@@ -203,7 +213,7 @@ class VisitAssessmentModelTest(TestCase):
         )
         assessment.set_value('Great location')
         assessment.save()
-        
+
         self.assertEqual(assessment.get_value(), 'Great location')
         self.assertEqual(assessment.value_text, 'Great location')
 
@@ -213,12 +223,12 @@ class VisitAssessmentModelTest(TestCase):
             name='Test Criteria',
             type='boolean'
         )
-        
+
         VisitAssessment.objects.create(
             visit=self.visit,
             criteria=criteria
         )
-        
+
         with self.assertRaises(IntegrityError):
             VisitAssessment.objects.create(
                 visit=self.visit,
@@ -260,7 +270,7 @@ class ProjectInvitationModelTest(TestCase):
             email=self.collaborator.email,
             invited_by=self.user
         )
-        
+
         result = invitation.accept_invitation(self.collaborator)
         self.assertTrue(result)
         self.assertTrue(invitation.accepted)
@@ -273,7 +283,7 @@ class ProjectInvitationModelTest(TestCase):
             email='duplicate@example.com',
             invited_by=self.user
         )
-        
+
         with self.assertRaises(IntegrityError):
             ProjectInvitation.objects.create(
                 project=self.project,
@@ -656,28 +666,28 @@ class VisitAssessmentFormTest(TestCase):
             visit_date=date.today(),
             created_by=self.user
         )
-        
+
         form_data = {
             f'criteria_{self.boolean_criteria.id}': True,
             f'criteria_{self.numeric_criteria.id}': 1500.00,
         }
-        
+
         form = VisitAssessmentForm(self.project, data=form_data)
         self.assertTrue(form.is_valid())
-        
+
         assessments = form.save_assessments(visit)
         self.assertEqual(len(assessments), 2)
-        
+
         # Verify assessments were saved correctly
         boolean_assessment = VisitAssessment.objects.get(visit=visit, criteria=self.boolean_criteria)
         self.assertTrue(boolean_assessment.get_value())
-        
+
         numeric_assessment = VisitAssessment.objects.get(visit=visit, criteria=self.numeric_criteria)
         self.assertEqual(numeric_assessment.get_value(), 1500.00)
 
 class ComparisonViewTest(TestCase):
     """Test comparison table and export functionality."""
-    
+
     def setUp(self):
         self.user = User.objects.create_user(
             username='comparisonuser',
@@ -688,7 +698,7 @@ class ComparisonViewTest(TestCase):
             name='Test Housing Project',
             owner=self.user
         )
-        
+
         # Create test criteria
         self.criteria1 = Criteria.objects.create(
             project=self.project,
@@ -704,7 +714,7 @@ class ComparisonViewTest(TestCase):
             weight=1.5,
             order=2
         )
-        
+
         # Create test visits
         self.visit1 = Visit.objects.create(
             project=self.project,
@@ -720,26 +730,26 @@ class ComparisonViewTest(TestCase):
             visit_date='2024-01-20',
             created_by=self.user
         )
-        
+
         # Create test assessments
         assessment1 = VisitAssessment.objects.create(visit=self.visit1, criteria=self.criteria1)
         assessment1.set_value(250000)
         assessment1.save()
-        
+
         assessment2 = VisitAssessment.objects.create(visit=self.visit1, criteria=self.criteria2)
         assessment2.set_value(4)
         assessment2.save()
-        
+
         assessment3 = VisitAssessment.objects.create(visit=self.visit2, criteria=self.criteria1)
         assessment3.set_value(300000)
         assessment3.save()
-        
+
         assessment4 = VisitAssessment.objects.create(visit=self.visit2, criteria=self.criteria2)
         assessment4.set_value(3)
         assessment4.save()
-        
+
         self.client.login(username='comparisonuser', password='testpass123')
-    
+
     def test_comparison_table_view(self):
         """Test comparison table view."""
         url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
@@ -750,7 +760,7 @@ class ComparisonViewTest(TestCase):
         self.assertContains(response, 'House B')
         self.assertContains(response, 'Price')
         self.assertContains(response, 'Location Rating')
-    
+
     def test_comparison_table_sorting(self):
         """Test comparison table sorting functionality."""
         url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
@@ -759,7 +769,7 @@ class ComparisonViewTest(TestCase):
         # Should contain sorted data
         self.assertContains(response, 'House A')
         self.assertContains(response, 'House B')
-    
+
     def test_comparison_table_filtering(self):
         """Test comparison table filtering functionality."""
         url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
@@ -769,7 +779,7 @@ class ComparisonViewTest(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'House A')
-    
+
     def test_csv_export(self):
         """Test CSV export functionality."""
         url = reverse('projects:export_csv', kwargs={'pk': self.project.pk})
@@ -782,9 +792,9 @@ class ComparisonViewTest(TestCase):
         self.assertIn('House A', content)
         self.assertIn('House B', content)
         self.assertIn('Price', content)
-    
 
-    
+
+
     def test_comparison_unauthorized_access(self):
         """Test unauthorized access to comparison table."""
         other_user = User.objects.create_user(
@@ -793,11 +803,11 @@ class ComparisonViewTest(TestCase):
             password='testpass123'
         )
         self.client.login(username='otherusercomp', password='testpass123')
-        
+
         url = reverse('projects:comparison_table', kwargs={'pk': self.project.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)  # Redirect to projects list
-    
+
     def test_comparison_no_visits(self):
         """Test comparison table with no visits."""
         # Create empty project
@@ -805,11 +815,11 @@ class ComparisonViewTest(TestCase):
             name='Empty Project',
             owner=self.user
         )
-        
+
         url = reverse('projects:comparison_table', kwargs={'pk': empty_project.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)  # Redirect to visit list
-    
+
     def test_comparison_no_criteria(self):
         """Test comparison table with no criteria."""
         # Create project with visits but no criteria
@@ -824,7 +834,7 @@ class ComparisonViewTest(TestCase):
             visit_date='2024-01-15',
             created_by=self.user
         )
-        
+
         url = reverse('projects:comparison_table', kwargs={'pk': project_no_criteria.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)  # Redirect to criteria list

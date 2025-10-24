@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, Realtor
+
+from .models import Criteria, Project, Realtor, Visit, VisitAssessment, VisitPhoto
 
 
 class RangeInput(forms.TextInput):
@@ -16,7 +17,7 @@ class TelInput(forms.TextInput):
 
 class ProjectForm(forms.ModelForm):
     """Form for creating and editing projects."""
-    
+
     class Meta:
         model = Project
         fields = ['name']
@@ -27,7 +28,7 @@ class ProjectForm(forms.ModelForm):
                 'maxlength': '200'
             })
         }
-    
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if name:
@@ -39,7 +40,7 @@ class ProjectForm(forms.ModelForm):
 
 class ProjectInvitationForm(forms.Form):
     """Form for inviting users to collaborate on a project."""
-    
+
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -47,7 +48,7 @@ class ProjectInvitationForm(forms.Form):
         }),
         help_text="Enter the email address of the person you want to invite."
     )
-    
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
@@ -57,7 +58,7 @@ class ProjectInvitationForm(forms.Form):
 
 class RealtorForm(forms.ModelForm):
     """Form for creating and editing realtors."""
-    
+
     class Meta:
         model = Realtor
         fields = ['name', 'company', 'phone', 'email', 'notes']
@@ -87,7 +88,7 @@ class RealtorForm(forms.ModelForm):
                 'rows': 3
             })
         }
-    
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if name:
@@ -99,7 +100,7 @@ class RealtorForm(forms.ModelForm):
 
 class CriteriaForm(forms.ModelForm):
     """Form for creating and editing criteria."""
-    
+
     class Meta:
         model = Criteria
         fields = ['name', 'type', 'weight', 'order']
@@ -124,7 +125,7 @@ class CriteriaForm(forms.ModelForm):
                 'min': '0'
             })
         }
-    
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if name:
@@ -132,7 +133,7 @@ class CriteriaForm(forms.ModelForm):
             if len(name) < 2:
                 raise forms.ValidationError("Criteria name must be at least 2 characters long.")
         return name
-    
+
     def clean_weight(self):
         weight = self.cleaned_data.get('weight')
         if weight is not None and (weight < 0.5 or weight > 10):
@@ -142,7 +143,7 @@ class CriteriaForm(forms.ModelForm):
 
 class VisitForm(forms.ModelForm):
     """Form for creating and editing visits."""
-    
+
     # Add a custom field for realtor selection with "Add new" option
     realtor_choice = forms.ChoiceField(
         required=False,
@@ -152,7 +153,7 @@ class VisitForm(forms.ModelForm):
             'id': 'realtor-select'
         })
     )
-    
+
     class Meta:
         model = Visit
         fields = ['name', 'address', 'realtor', 'visit_date', 'notes']
@@ -180,23 +181,23 @@ class VisitForm(forms.ModelForm):
                 'rows': 4
             })
         }
-    
+
     def __init__(self, project=None, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         # Set up realtor choices based on project
         if project:
             realtors = project.realtors.all().order_by('name')
             choices = [('', 'No realtor selected')]
             choices.extend([(r.id, str(r)) for r in realtors])
             choices.append(('add_new', '+ Add new realtor'))
-            
+
             self.fields['realtor_choice'].choices = choices
-            
+
             # Set initial value if editing
             if self.instance and self.instance.realtor:
                 self.fields['realtor_choice'].initial = self.instance.realtor.id
-    
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if name:
@@ -204,15 +205,15 @@ class VisitForm(forms.ModelForm):
             if len(name) < 2:
                 raise forms.ValidationError("Property name must be at least 2 characters long.")
         return name
-    
+
     def clean_address(self):
         address = self.cleaned_data.get('address')
         return address
-    
+
     def clean(self):
         cleaned_data = super().clean()
         realtor_choice = cleaned_data.get('realtor_choice')
-        
+
         # Handle realtor selection
         if realtor_choice and realtor_choice != 'add_new' and realtor_choice != '':
             try:
@@ -220,23 +221,23 @@ class VisitForm(forms.ModelForm):
                 cleaned_data['realtor'] = realtor
             except Realtor.DoesNotExist:
                 pass
-        
+
         return cleaned_data
 
 
 class VisitAssessmentForm(forms.Form):
     """Dynamic form for visit assessments based on project criteria."""
-    
+
     def __init__(self, project, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project = project
-        
+
         # Create fields for each criteria
         criteria_count = 0
         for criteria in project.criteria.all():
             field_name = f'criteria_{criteria.id}'
             criteria_count += 1
-            
+
             if criteria.type == 'boolean':
                 self.fields[field_name] = forms.BooleanField(
                     label=criteria.name,
@@ -281,32 +282,34 @@ class VisitAssessmentForm(forms.Form):
                         'rows': 2
                     })
                 )
-        
+
         # Debug logging (only in development)
         import logging
+
         from django.conf import settings
         if settings.DEBUG:
             logger = logging.getLogger(__name__)
             logger.debug(f"VisitAssessmentForm initialized with {criteria_count} criteria, {len(self.fields)} fields")
-    
+
     def save_assessments(self, visit):
         """Save assessment data for the visit."""
         import logging
+
         from django.conf import settings
         logger = logging.getLogger(__name__)
-        
+
         assessments = []
         if settings.DEBUG:
             logger.debug(f"Saving assessments for visit {visit.id}")
             logger.debug(f"Cleaned data: {self.cleaned_data}")
-        
+
         for criteria in self.project.criteria.all():
             field_name = f'criteria_{criteria.id}'
             value = self.cleaned_data.get(field_name)
-            
+
             if settings.DEBUG:
                 logger.debug(f"Processing {field_name} ({criteria.name}): {value}")
-            
+
             if value is not None and value != '':
                 # Get or create assessment
                 assessment, created = VisitAssessment.objects.get_or_create(
@@ -316,17 +319,17 @@ class VisitAssessmentForm(forms.Form):
                 assessment.set_value(value)
                 assessment.save()
                 assessments.append(assessment)
-                
+
                 if settings.DEBUG:
                     logger.debug(f"Saved assessment for {criteria.name}: {assessment.get_value()}")
-        
+
         logger.info(f"Saved {len(assessments)} assessments for visit {visit.id}")
         return assessments
 
 
 class VisitPhotoForm(forms.ModelForm):
     """Form for uploading visit photos."""
-    
+
     class Meta:
         model = VisitPhoto
         fields = ['image', 'caption']
@@ -341,18 +344,18 @@ class VisitPhotoForm(forms.ModelForm):
                 'maxlength': '200'
             })
         }
-    
+
     def clean_image(self):
         image = self.cleaned_data.get('image')
         if image:
             # Check file size (max 5MB)
             if image.size > 5 * 1024 * 1024:
                 raise forms.ValidationError("Image file too large. Maximum size is 5MB.")
-            
+
             # Check file type
             if not image.content_type.startswith('image/'):
                 raise forms.ValidationError("Please upload a valid image file.")
-        
+
         return image
 
 
@@ -368,7 +371,7 @@ VisitPhotoFormSet = forms.modelformset_factory(
 
 class DefaultCriteriaForm(forms.Form):
     """Form for selecting default criteria templates."""
-    
+
     TEMPLATE_CHOICES = [
         ('basic_housing', 'Basic Housing Evaluation'),
         ('rental_apartment', 'Rental Apartment'),
@@ -376,7 +379,7 @@ class DefaultCriteriaForm(forms.Form):
         ('student_housing', 'Student Housing'),
         ('family_home', 'Family Home'),
     ]
-    
+
     template = forms.ChoiceField(
         choices=TEMPLATE_CHOICES,
         widget=forms.Select(attrs={
@@ -384,11 +387,11 @@ class DefaultCriteriaForm(forms.Form):
         }),
         help_text="Select a template to add common criteria for your project type."
     )
-    
+
     def get_template_criteria(self):
         """Return criteria for the selected template."""
         template = self.cleaned_data.get('template')
-        
+
         templates = {
             'basic_housing': [
                 {'name': 'Monthly Rent/Price', 'type': 'numeric', 'weight': 2.0, 'order': 1},
@@ -448,5 +451,5 @@ class DefaultCriteriaForm(forms.Form):
                 {'name': 'Storage Space', 'type': 'rating', 'weight': 1.0, 'order': 10},
             ],
         }
-        
+
         return templates.get(template, [])

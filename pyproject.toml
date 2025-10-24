@@ -12,6 +12,8 @@ dependencies = [
     "whitenoise>=6.6.0",
     "requests>=2.31.0",
     "python-dotenv>=1.1.1",
+    "pre-commit>=4.3.0",
+    "djlint>=1.36.4",
 ]
 
 [project.optional-dependencies]

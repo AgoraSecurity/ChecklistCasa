@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Project, Criteria, Visit, VisitAssessment, VisitPhoto, ProjectInvitation, Realtor
+
+from .models import (
+    Criteria,
+    Project,
+    ProjectInvitation,
+    Realtor,
+    Visit,
+    VisitAssessment,
+    VisitPhoto,
+)
 
 
 @admin.register(Project)
@@ -41,10 +50,12 @@ class VisitAssessmentAdmin(admin.ModelAdmin):
     list_filter = ['criteria__type', 'visit__project']
     search_fields = ['visit__name', 'criteria__name']
     readonly_fields = ['created_at', 'updated_at']
-    
+
+    @admin.display(
+        description='Value'
+    )
     def get_value(self, obj):
         return obj.get_value()
-    get_value.short_description = 'Value'
 
 
 @admin.register(VisitPhoto)

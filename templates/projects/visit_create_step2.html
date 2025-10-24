@@ -1,217 +1,218 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ title }} - {{ project.name }} - Housing Evaluation System{% endblock %}
-
 {% block content %}
-<div class="mb-8">
-    <a href="{% url 'projects:visit_create' project.pk %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Step 1
-    </a>
-    
-    <h1 class="text-3xl font-bold text-gray-900">Log New Visit</h1>
-    <p class="text-gray-600 mt-2">{{ project.name }}</p>
-</div>
-
-<!-- Progress Indicator -->
-<div class="mb-8">
-    <nav aria-label="Progress">
-        <ol class="flex items-center">
-            <li class="relative pr-8 sm:pr-20">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="h-0.5 w-full bg-blue-200"></div>
-                </div>
-                <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-blue-600">Basic Info</span>
-            </li>
-            
-            <li class="relative pr-8 sm:pr-20">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="h-0.5 w-full bg-gray-200"></div>
-                </div>
-                <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
-                    <span class="text-sm font-medium">2</span>
-                </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-blue-600">Assessment</span>
-            </li>
-            
-            <li class="relative">
-                <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
-                    <span class="text-sm font-medium">3</span>
-                </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-gray-500">Photos</span>
-            </li>
-        </ol>
-    </nav>
-</div>
-
-<!-- Property Summary -->
-<div class="mb-6 bg-gray-50 rounded-lg p-4">
-    <h3 class="text-sm font-medium text-gray-900 mb-2">Property Summary</h3>
-    <div class="text-sm text-gray-600">
-        <p class="font-medium">{{ visit_data.name }}</p>
-        <p>{{ visit_data.address }}</p>
-        <p>Visit Date: {{ visit_data.visit_date|date:"M j, Y" }}</p>
+    <div class="mb-8">
+        <a href="{% url 'projects:visit_create' project.pk %}"
+           class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+            <svg class="w-4 h-4 mr-2"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Step 1
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900">Log New Visit</h1>
+        <p class="text-gray-600 mt-2">{{ project.name }}</p>
     </div>
-</div>
-
-<div class="max-w-4xl">
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold text-gray-900">Property Assessment</h2>
-            <p class="text-gray-600 mt-1">Evaluate this property against your criteria. You can skip any criteria that don't apply.</p>
+    <!-- Progress Indicator -->
+    <div class="mb-8">
+        <nav aria-label="Progress">
+            <ol class="flex items-center">
+                <li class="relative pr-8 sm:pr-20">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="h-0.5 w-full bg-blue-200"></div>
+                    </div>
+                    <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd">
+                            </path>
+                        </svg>
+                    </div>
+                    <span class="absolute top-10 left-0 text-xs font-medium text-blue-600">Basic Info</span>
+                </li>
+                <li class="relative pr-8 sm:pr-20">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="h-0.5 w-full bg-gray-200"></div>
+                    </div>
+                    <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+                        <span class="text-sm font-medium">2</span>
+                    </div>
+                    <span class="absolute top-10 left-0 text-xs font-medium text-blue-600">Assessment</span>
+                </li>
+                <li class="relative">
+                    <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                        <span class="text-sm font-medium">3</span>
+                    </div>
+                    <span class="absolute top-10 left-0 text-xs font-medium text-gray-500">Photos</span>
+                </li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Property Summary -->
+    <div class="mb-6 bg-gray-50 rounded-lg p-4">
+        <h3 class="text-sm font-medium text-gray-900 mb-2">Property Summary</h3>
+        <div class="text-sm text-gray-600">
+            <p class="font-medium">{{ visit_data.name }}</p>
+            <p>{{ visit_data.address }}</p>
+            <p>Visit Date: {{ visit_data.visit_date|date:"M j, Y" }}</p>
         </div>
-        
-        <form method="post" class="space-y-8">
-            {% csrf_token %}
-            
-            {% for field in form %}
-                <div class="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <label for="{{ field.id_for_label }}" class="block text-base font-medium text-gray-900 mb-3">
-                                {{ field.label }}
-                            </label>
-                            
-                            {% if field.field.widget.input_type == 'range' and field.field.max_value == 5 %}
-                                <!-- Rating Slider -->
-                                <div class="space-y-3">
-                                    <div class="flex items-center space-x-4">
-                                        {{ field }}
-                                        <span id="{{ field.id_for_label }}_value" class="text-xl font-bold text-blue-600 min-w-[3rem]">3</span>
+    </div>
+    <div class="max-w-4xl">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-900">Property Assessment</h2>
+                <p class="text-gray-600 mt-1">
+                    Evaluate this property against your criteria. You can skip any criteria that don't apply.
+                </p>
+            </div>
+            <form method="post" class="space-y-8">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <label for="{{ field.id_for_label }}"
+                                       class="block text-base font-medium text-gray-900 mb-3">{{ field.label }}</label>
+                                {% if field.field.widget.input_type == 'range' and field.field.max_value == 5 %}
+                                    <!-- Rating Slider -->
+                                    <div class="space-y-3">
+                                        <div class="flex items-center space-x-4">
+                                            {{ field }}
+                                            <span id="{{ field.id_for_label }}_value"
+                                                  class="text-xl font-bold text-blue-600 min-w-[3rem]">3</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm text-gray-500 px-1">
+                                            <span>😞 Poor</span>
+                                            <span>😐 Fair</span>
+                                            <span>🙂 Good</span>
+                                            <span>😊 Very Good</span>
+                                            <span>🤩 Excellent</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 text-center">{{ field.help_text }}</p>
                                     </div>
-                                    <div class="flex justify-between text-sm text-gray-500 px-1">
-                                        <span>😞 Poor</span>
-                                        <span>😐 Fair</span>
-                                        <span>🙂 Good</span>
-                                        <span>😊 Very Good</span>
-                                        <span>🤩 Excellent</span>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="mt-2 text-sm text-red-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd">
+                                            </path>
+                                        </svg>
+                                        {{ field.errors.0 }}
                                     </div>
-                                    <p class="text-xs text-gray-500 text-center">{{ field.help_text }}</p>
-                                </div>
-                            {% else %}
-                                {{ field }}
-                            {% endif %}
-                            
-                            {% if field.errors %}
-                                <div class="mt-2 text-sm text-red-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    {{ field.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="ml-4 flex flex-col items-end">
-                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Optional</span>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Optional</span>
+                            </div>
                         </div>
                     </div>
+                {% endfor %}
+                {% if not form %}
+                    <div class="text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                            </path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No criteria defined</h3>
+                        <p class="mt-1 text-sm text-gray-500">This project doesn't have any evaluation criteria yet.</p>
+                    </div>
+                {% endif %}
+                <div class="flex justify-between pt-6 border-t border-gray-200">
+                    <a href="{% url 'projects:visit_create' project.pk %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 mr-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </a>
+                    <button type="submit"
+                            class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Next: Photos
+                        <svg class="w-4 h-4 ml-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
                 </div>
-            {% endfor %}
-            
-            {% if not form %}
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No criteria defined</h3>
-                    <p class="mt-1 text-sm text-gray-500">This project doesn't have any evaluation criteria yet.</p>
-                </div>
-            {% endif %}
-            
-            <div class="flex justify-between pt-6 border-t border-gray-200">
-                <a href="{% url 'projects:visit_create' project.pk %}" 
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Back
-                </a>
-                
-                <button type="submit" 
-                        class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Next: Photos
-                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+    <script>
+        // Rating sliders and auto-save functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
 
-<script>
-// Rating sliders and auto-save functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    
-    // Initialize rating sliders
-    const ratingSliders = document.querySelectorAll('input[type="range"][max="5"]');
-    ratingSliders.forEach(slider => {
-        const valueDisplay = document.getElementById(slider.id + '_value');
-        if (valueDisplay) {
-            // Update display when slider changes
-            slider.addEventListener('input', function() {
-                valueDisplay.textContent = this.value;
-                
-                // Add visual feedback with colors
-                const colors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
-                valueDisplay.className = `text-xl font-bold ${colors[this.value - 1]} min-w-[3rem]`;
-            });
-            
-            // Set initial value
-            const initialValue = slider.value || '3';
-            valueDisplay.textContent = initialValue;
-            const colors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
-            valueDisplay.className = `text-xl font-bold ${colors[initialValue - 1]} min-w-[3rem]`;
-        }
-    });
-    
-    // Load saved data
-    const savedData = localStorage.getItem('visit_assessment_{{ project.pk }}');
-    if (savedData) {
-        try {
-            const data = JSON.parse(savedData);
-            Object.keys(data).forEach(key => {
-                const field = document.querySelector(`[name="${key}"]`);
-                if (field) {
-                    if (field.type === 'checkbox') {
-                        field.checked = data[key];
-                    } else if (field.type === 'range') {
-                        field.value = data[key];
-                        // Trigger input event to update display
-                        field.dispatchEvent(new Event('input'));
-                    } else {
-                        field.value = data[key];
-                    }
+            // Initialize rating sliders
+            const ratingSliders = document.querySelectorAll('input[type="range"][max="5"]');
+            ratingSliders.forEach(slider => {
+                const valueDisplay = document.getElementById(slider.id + '_value');
+                if (valueDisplay) {
+                    // Update display when slider changes
+                    slider.addEventListener('input', function() {
+                        valueDisplay.textContent = this.value;
+
+                        // Add visual feedback with colors
+                        const colors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
+                        valueDisplay.className = `text-xl font-bold ${colors[this.value - 1]} min-w-[3rem]`;
+                    });
+
+                    // Set initial value
+                    const initialValue = slider.value || '3';
+                    valueDisplay.textContent = initialValue;
+                    const colors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
+                    valueDisplay.className = `text-xl font-bold ${colors[initialValue - 1]} min-w-[3rem]`;
                 }
             });
-        } catch (e) {
-            console.log('Could not restore form data');
-        }
-    }
-    
-    // Save data on change
-    form.addEventListener('change', function(e) {
-        const formData = new FormData(form);
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            data[key] = value;
-        }
-        localStorage.setItem('visit_assessment_{{ project.pk }}', JSON.stringify(data));
-    });
-    
-    // Clear saved data on successful submit
-    form.addEventListener('submit', function() {
-        localStorage.removeItem('visit_assessment_{{ project.pk }}');
-    });
-});
-</script>
+
+            // Load saved data
+            const savedData = localStorage.getItem('visit_assessment_{{ project.pk }}');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    Object.keys(data).forEach(key => {
+                        const field = document.querySelector(`[name="${key}"]`);
+                        if (field) {
+                            if (field.type === 'checkbox') {
+                                field.checked = data[key];
+                            } else if (field.type === 'range') {
+                                field.value = data[key];
+                                // Trigger input event to update display
+                                field.dispatchEvent(new Event('input'));
+                            } else {
+                                field.value = data[key];
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.log('Could not restore form data');
+                }
+            }
+
+            // Save data on change
+            form.addEventListener('change', function(e) {
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                localStorage.setItem('visit_assessment_{{ project.pk }}', JSON.stringify(data));
+            });
+
+            // Clear saved data on successful submit
+            form.addEventListener('submit', function() {
+                localStorage.removeItem('visit_assessment_{{ project.pk }}');
+            });
+        });
+    </script>
 {% endblock %}

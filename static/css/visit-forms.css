@@ -85,12 +85,12 @@ input[type="range"][data-show-value="true"] {
         font-size: 16px; /* Prevents zoom on iOS */
         padding: 16px;
     }
-    
+
     .range-slider::-webkit-slider-thumb {
         width: 28px;
         height: 28px;
     }
-    
+
     .range-slider::-moz-range-thumb {
         width: 28px;
         height: 28px;
@@ -178,7 +178,7 @@ input[type="range"][data-show-value="true"] {
         background: #000000;
         border: 2px solid #ffffff;
     }
-    
+
     .range-slider::-webkit-slider-thumb {
         background: #ffffff;
         border: 2px solid #000000;
@@ -192,7 +192,7 @@ input[type="range"][data-show-value="true"] {
         border-color: #4b5563;
         color: #f9fafb;
     }
-    
+
     .form-field-container:focus-within {
         border-color: #60a5fa;
         box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);

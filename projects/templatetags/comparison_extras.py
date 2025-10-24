@@ -46,7 +46,7 @@ def is_worst_value(value, stats):
     if value is not None and stats:
         min_val = stats.get('min_val')
         max_val = stats.get('max_val')
-        return (min_val is not None and max_val is not None and 
+        return (min_val is not None and max_val is not None and
                 min_val != max_val and float(value) == float(min_val))
     return False
 

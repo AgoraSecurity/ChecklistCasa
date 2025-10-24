@@ -1,55 +1,56 @@
 {% extends 'account/base.html' %}
-
 {% block title %}Confirm Email - Housing Evaluation System{% endblock %}
-
 {% block content %}
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div class="text-center">
-            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-                Confirm your email
-            </h2>
-            {% if confirmation %}
-                <p class="mt-2 text-sm text-gray-600">
-                    Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is an email address for user {{ confirmation.email_address.user.email }}.
-                </p>
-            {% else %}
-                <p class="mt-2 text-sm text-red-600">
-                    This confirmation link is invalid or has expired.
-                </p>
-            {% endif %}
-        </div>
-
-        {% if confirmation %}
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-green-500 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </span>
-                    Confirm Email Address
-                </button>
-            </form>
-        {% else %}
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
             <div class="text-center">
-                <a href="{% url 'account_email' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Request New Confirmation
-                </a>
+                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+                    <svg class="h-6 w-6 text-blue-600"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Confirm your email</h2>
+                {% if confirmation %}
+                    <p class="mt-2 text-sm text-gray-600">
+                        Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is an email address for user {{ confirmation.email_address.user.email }}.
+                    </p>
+                {% else %}
+                    <p class="mt-2 text-sm text-red-600">This confirmation link is invalid or has expired.</p>
+                {% endif %}
             </div>
-        {% endif %}
-
-        <div class="text-center">
-            <a href="{% url 'home' %}" class="font-medium text-blue-600 hover:text-blue-500">
-                Return to home page
-            </a>
+            {% if confirmation %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <svg class="h-5 w-5 text-green-500 group-hover:text-green-400"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </span>
+                        Confirm Email Address
+                    </button>
+                </form>
+            {% else %}
+                <div class="text-center">
+                    <a href="{% url 'account_email' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Request New Confirmation
+                    </a>
+                </div>
+            {% endif %}
+            <div class="text-center">
+                <a href="{% url 'home' %}"
+                   class="font-medium text-blue-600 hover:text-blue-500">Return to home page</a>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

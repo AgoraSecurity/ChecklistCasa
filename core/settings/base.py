@@ -4,6 +4,7 @@ Base Django settings for Housing Evaluation System.
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -13,7 +14,7 @@ load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
-    'SECRET_KEY', 
+    'SECRET_KEY',
     'django-insecure-_tpjy_=1-fw8e6^m)=pnaevonm^x@w6ka1#9_)286q$t=y+5ys'
 )
 

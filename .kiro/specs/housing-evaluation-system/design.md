@@ -15,10 +15,10 @@ graph TB
     C --> D[Project Management Layer]
     D --> E[Data Access Layer]
     E --> F[SQLite Database]
-    
+
     B --> G[Static Files]
     B --> H[Media Files]
-    
+
     I[Email Service] --> J[Mailgun API]
     B --> I
 ```

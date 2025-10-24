@@ -1,22 +1,16 @@
 {% extends 'base.html' %}
-
-{% block navbar %}
-<!-- No navigation for auth pages -->
-{% endblock %}
-
+{% block navbar %}<!-- No navigation for auth pages -->{% endblock %}
 {% block main_container %}
-<main class="bg-gray-50">
-    {% if messages %}
-        <div class="max-w-md mx-auto pt-6 px-4">
-            {% for message in messages %}
-                <div class="mb-4 p-4 rounded-md {% if message.tags == 'error' %}bg-red-50 text-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-blue-50 text-blue-800{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% block content %}
-    {% endblock %}
-</main>
+    <main class="bg-gray-50">
+        {% if messages %}
+            <div class="max-w-md mx-auto pt-6 px-4">
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-md {% if message.tags == 'error' %}bg-red-50 text-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
 {% endblock %}
