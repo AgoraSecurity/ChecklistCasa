@@ -14,6 +14,8 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("projects/", include("projects.urls")),
     path("user/", include("accounts.urls")),
+    path('health/', views.health_check, name='health_check'),
+    path('health/basic/', views.basic_health_check, name='basic_health_check'),
     path("", views.home_view, name="home"),
 ]
 
