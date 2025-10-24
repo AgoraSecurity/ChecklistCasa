@@ -113,6 +113,7 @@ source = { editable = "." }
 dependencies = [
     { name = "django" },
     { name = "django-allauth" },
+    { name = "django-anymail" },
     { name = "djlint" },
     { name = "gunicorn" },
     { name = "pillow" },
@@ -138,6 +139,7 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "django", specifier = ">=5.2,<6.0" },
     { name = "django-allauth", specifier = ">=0.57.0" },
+    { name = "django-anymail", specifier = ">=10.0" },
     { name = "django-stubs", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "djlint", specifier = ">=1.36.4" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
@@ -219,6 +221,20 @@ dependencies = [
     { name = "django" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/52/94/75d7f8c59e061d1b66a6d917b287817fe02d2671c9e6376a4ddfb3954989/django_allauth-65.12.1.tar.gz", hash = "sha256:662666ff2d5c71766f66b1629ac7345c30796813221184e13e11ed7460940c6a", size = 1967971, upload-time = "2025-10-16T16:39:58.342Z" }
+
+[[package]]
+name = "django-anymail"
+version = "13.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "requests" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a3/a5/258d7b7bc1b0ca91791c25c704fa4c2d500727d0c3e29843c182f9f9c4be/django_anymail-13.1.tar.gz", hash = "sha256:b51783176f8a8382e958808151551558e4a46d1375fbc343742d1ebd06ce8e9e", size = 96518, upload-time = "2025-09-03T20:00:21.071Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/ba/d34a011cb8da04ed4a7c60b9a7aa25eed61348d1f6113af66ba725b56ae4/django_anymail-13.1-py3-none-any.whl", hash = "sha256:63e48402ec8258f17640eb73c8c64141f16d2f8ae7d448d0fb1c66e82b7cbcf6", size = 134063, upload-time = "2025-09-03T20:00:19.427Z" },
+]
 
 [[package]]
 name = "django-stubs"

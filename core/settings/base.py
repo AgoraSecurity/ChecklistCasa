@@ -32,6 +32,7 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "anymail",
 ]
 
 LOCAL_APPS = [
@@ -149,8 +150,7 @@ LOGOUT_REDIRECT_URL = "/"
 EMAIL_BACKEND = (
     "django.core.mail.backends.console.EmailBackend"  # Will be overridden in production
 )
-# DEFAULT_FROM_EMAIL = 'noreply@checklist.casa'
-DEFAULT_FROM_EMAIL = "checklist@agorabots.com"
+DEFAULT_FROM_EMAIL = 'noreply@checklist.casa'
 SERVER_EMAIL = "server@checklist.casa"
 
 # Mailgun API settings
