@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}My Projects - Housing Evaluation System{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+    <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">My Projects</h1>
+        <p class="text-gray-600 mt-1">Manage your housing evaluation projects</p>
+    </div>
+    <a href="{% url 'projects:create' %}" class="btn btn-primary btn-lg">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        New Project
+    </a>
+</div>
+
+{% if has_projects %}
+    <!-- Active Projects -->
+    {% if active_projects %}
+        <div class="mb-8">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                Active Projects
+            </h2>
+            <div class="grid-responsive">
+                {% for project in active_projects %}
+                    <div class="card" hx-boost="true">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate pr-2">
+                                    {{ project.name }}
+                                </h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 flex-shrink-0">
+                                    Active
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm text-gray-600 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    {% if project.owner == user %}
+                                        Owner
+                                    {% else %}
+                                        Collaborator
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.196M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    {{ project.collaborators.count|add:1 }} member{{ project.collaborators.count|add:1|pluralize }}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0v4m0-10V9a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9a2 2 0 00-2-2h-2z"></path>
+                                    </svg>
+                                    {{ project.visits.count }} visit{{ project.visits.count|pluralize }}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Created {{ project.created_at|date:"M j, Y" }}
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col space-y-2">
+                                <a href="{% url 'projects:detail' project.pk %}" 
+                                   class="btn btn-primary btn-sm w-full">
+                                    View Project
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                                {% if project.visits.count > 0 %}
+                                    <a href="{% url 'projects:comparison_table' project.pk %}" 
+                                       class="btn btn-outline btn-sm w-full">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        Compare Properties
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Finished Projects -->
+    {% if finished_projects %}
+        <div class="mb-8">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="w-2 h-2 bg-gray-500 rounded-full mr-3"></span>
+                Finished Projects
+            </h2>
+            <div class="grid-responsive">
+                {% for project in finished_projects %}
+                    <div class="card opacity-75" hx-boost="true">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate pr-2">
+                                    {{ project.name }}
+                                </h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex-shrink-0">
+                                    Finished
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm text-gray-600 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    {% if project.owner == user %}
+                                        Owner
+                                    {% else %}
+                                        Collaborator
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.196M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    {{ project.collaborators.count|add:1 }} member{{ project.collaborators.count|add:1|pluralize }}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0v4m0-10V9a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9a2 2 0 00-2-2h-2z"></path>
+                                    </svg>
+                                    {{ project.visits.count }} visit{{ project.visits.count|pluralize }}
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Finished {{ project.finished_at|date:"M j, Y" }}
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col space-y-2">
+                                <a href="{% url 'projects:detail' project.pk %}" 
+                                   class="btn btn-outline btn-sm w-full">
+                                    View Project
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                                {% if project.visits.count > 0 %}
+                                    <a href="{% url 'projects:comparison_table' project.pk %}" 
+                                       class="btn btn-outline btn-sm w-full">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        View Results
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+{% else %}
+    <!-- Empty State -->
+    <div class="card text-center py-12">
+        <div class="card-body">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No projects yet</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                Create your first project to start evaluating properties and making informed housing decisions.
+            </p>
+            <a href="{% url 'projects:create' %}" 
+               class="btn btn-primary btn-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Create Your First Project
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Stats -->
+{% if has_projects %}
+<div class="mt-8">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-medium text-gray-900">Quick Stats</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-primary-600">{{ active_projects|length }}</div>
+                    <div class="text-sm text-gray-500">Active Projects</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-600">{{ finished_projects|length }}</div>
+                    <div class="text-sm text-gray-500">Finished Projects</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">
+                        {% for project in active_projects %}{{ project.visits.count }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                    </div>
+                    <div class="text-sm text-gray-500">Total Visits</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600">
+                        {% for project in active_projects %}{{ project.collaborators.count|add:1 }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                    </div>
+                    <div class="text-sm text-gray-500">Team Members</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

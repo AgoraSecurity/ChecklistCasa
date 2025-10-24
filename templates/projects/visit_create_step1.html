@@ -16,78 +16,79 @@
 </div>
 
 <!-- Progress Indicator -->
-<div class="mb-8">
+<div class="mb-6 sm:mb-8">
     <nav aria-label="Progress">
-        <ol class="flex items-center">
-            <li class="relative pr-8 sm:pr-20">
+        <ol class="flex items-center justify-center sm:justify-start">
+            <li class="relative pr-4 sm:pr-8 lg:pr-20">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                     <div class="h-0.5 w-full bg-gray-200"></div>
                 </div>
-                <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+                <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white shadow-sm">
                     <span class="text-sm font-medium">1</span>
                 </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-blue-600">Basic Info</span>
+                <span class="absolute top-10 left-0 text-xs font-medium text-primary-600 whitespace-nowrap">Basic Info</span>
             </li>
             
-            <li class="relative pr-8 sm:pr-20">
+            <li class="relative pr-4 sm:pr-8 lg:pr-20">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                     <div class="h-0.5 w-full bg-gray-200"></div>
                 </div>
                 <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
                     <span class="text-sm font-medium">2</span>
                 </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-gray-500">Assessment</span>
+                <span class="absolute top-10 left-0 text-xs font-medium text-gray-500 whitespace-nowrap">Assessment</span>
             </li>
             
             <li class="relative">
                 <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
                     <span class="text-sm font-medium">3</span>
                 </div>
-                <span class="absolute top-10 left-0 text-xs font-medium text-gray-500">Photos</span>
+                <span class="absolute top-10 left-0 text-xs font-medium text-gray-500 whitespace-nowrap">Photos</span>
             </li>
         </ol>
     </nav>
 </div>
 
-<div class="max-w-2xl">
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="mb-6">
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <div class="card-header">
             <h2 class="text-lg font-semibold text-gray-900">Property Information</h2>
             <p class="text-gray-600 mt-1">Enter basic details about the property you visited.</p>
         </div>
+        <div class="card-body">
         
-        <form method="post" class="space-y-6">
-            {% csrf_token %}
+            <form method="post" class="space-y-6" hx-boost="true">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        Property Name *
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="form-error">
+                            {{ form.name.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <p class="form-help">
+                        A name to identify this property (e.g., "Sunset Apartments Unit 4B", "123 Oak Street House")
+                    </p>
+                </div>
             
-            <div>
-                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Property Name *
-                </label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                    <div class="mt-1 text-sm text-red-600">
-                        {{ form.name.errors.0 }}
-                    </div>
-                {% endif %}
-                <p class="mt-1 text-sm text-gray-500">
-                    A name to identify this property (e.g., "Sunset Apartments Unit 4B", "123 Oak Street House")
-                </p>
-            </div>
-            
-            <div>
-                <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Address *
-                </label>
-                {{ form.address }}
-                {% if form.address.errors %}
-                    <div class="mt-1 text-sm text-red-600">
-                        {{ form.address.errors.0 }}
-                    </div>
-                {% endif %}
-                <p class="mt-1 text-sm text-gray-500">
-                    Full street address including city, state, and zip code
-                </p>
-            </div>
+                <div class="form-group">
+                    <label for="{{ form.address.id_for_label }}" class="form-label">
+                        Address *
+                    </label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="form-error">
+                            {{ form.address.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <p class="form-help">
+                        Full street address including city, state, and zip code
+                    </p>
+                </div>
             
             <div>
                 <label for="{{ form.visit_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
@@ -136,20 +137,21 @@
                 </p>
             </div>
             
-            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <a href="{% url 'projects:visit_list' project.pk %}" 
-                   class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Next: Assessment
-                    <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
+                <div class="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t border-gray-200">
+                    <a href="{% url 'projects:visit_list' project.pk %}" 
+                       class="btn btn-outline w-full sm:w-auto">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="btn btn-primary w-full sm:w-auto">
+                        Next: Assessment
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
