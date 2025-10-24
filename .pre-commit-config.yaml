@@ -22,6 +22,7 @@ repos:
       types: [python]
       args:
       -   --ignore=E501,E121,E123,E126,E226,E24,E704,W503,W504
+      -   --per-file-ignores=core/settings/*.py:F403,F401,F405
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
   hooks:

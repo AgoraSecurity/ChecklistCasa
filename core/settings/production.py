@@ -140,7 +140,7 @@ ADMINS = [
 MANAGERS = ADMINS
 
 # Error reporting
-SILENCED_SYSTEM_CHECKS = []
+SILENCED_SYSTEM_CHECKS: list[str] = []
 
 # Performance optimizations
 USE_TZ = True

@@ -1,25 +1,16 @@
 import csv
-import io
-import json
 import logging
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Max, Q
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
-from .services import EmailService
-
-logger = logging.getLogger(__name__)
 
 from .forms import (
     CriteriaForm,
@@ -29,24 +20,17 @@ from .forms import (
     RealtorForm,
     VisitAssessmentForm,
     VisitForm,
-    VisitPhotoForm,
 )
-from .models import (
-    Criteria,
-    Project,
-    ProjectInvitation,
-    Realtor,
-    Visit,
-    VisitAssessment,
-    VisitPhoto,
-)
+from .models import Criteria, Project, ProjectInvitation, Realtor, Visit, VisitPhoto
+from .services import EmailService
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
 def project_list(request):
     """Display list of user's projects."""
     # Get projects where user is owner or collaborator using Q objects
-    from django.db.models import Q
 
     user_projects = Project.objects.filter(
         Q(owner=request.user) | Q(collaborators=request.user)
@@ -235,7 +219,7 @@ def send_invitation(request, pk):
             # If email fails, delete the invitation
             invitation.delete()
             messages.error(
-                request, f"Failed to send invitation email. Please try again."
+                request, "Failed to send invitation email. Please try again."
             )
             logger.error(f"Failed to send invitation email: {e}")
 
@@ -599,7 +583,7 @@ def visit_create(request, pk):
                 )
 
             if visit_form.is_valid():
-                logger.info(f"Step 1 form valid - storing data in session")
+                logger.info("Step 1 form valid - storing data in session")
                 # Store form data in session
                 cleaned_data = visit_form.cleaned_data.copy()
                 # Remove realtor_choice from session data as it's not a model field
@@ -625,11 +609,11 @@ def visit_create(request, pk):
             # Step 2: Assessments
             assessment_form = VisitAssessmentForm(project, request.POST)
             if assessment_form.is_valid():
-                logger.info(f"Step 2 form valid - creating visit")
+                logger.info("Step 2 form valid - creating visit")
                 # Get visit data from session
                 visit_data = request.session.get("visit_data")
                 if not visit_data:
-                    logger.error(f"Step 2 - no visit data in session")
+                    logger.error("Step 2 - no visit data in session")
                     messages.error(request, "Session expired. Please start over.")
                     return redirect("projects:visit_create", pk=project.pk)
 
@@ -746,7 +730,7 @@ def visit_create(request, pk):
         # Check if we have visit data from step 1
         visit_data = request.session.get("visit_data")
         if not visit_data:
-            logger.warning(f"Step 2 GET - no visit data in session")
+            logger.warning("Step 2 GET - no visit data in session")
             messages.error(request, "Please complete step 1 first.")
             return redirect("projects:visit_create", pk=project.pk)
 

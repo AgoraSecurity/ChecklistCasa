@@ -1,20 +1,11 @@
 from datetime import date
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import (
-    Criteria,
-    Project,
-    ProjectInvitation,
-    Realtor,
-    Visit,
-    VisitAssessment,
-    VisitPhoto,
-)
+from .models import Criteria, Project, ProjectInvitation, Visit, VisitAssessment
 
 
 class ProjectModelTest(TestCase):
@@ -697,7 +688,7 @@ class ComparisonViewTest(TestCase):
 
     def test_comparison_unauthorized_access(self):
         """Test unauthorized access to comparison table."""
-        other_user = User.objects.create_user(
+        User.objects.create_user(
             username="otherusercomp",
             email="othercomp@example.com",
             password="testpass123",

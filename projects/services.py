@@ -3,7 +3,7 @@ Email services for the projects app.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import requests
 from django.conf import settings

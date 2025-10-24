@@ -1,6 +1,5 @@
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from projects.models import Project
 
