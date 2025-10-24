@@ -84,7 +84,7 @@
     <div class="mb-6">
         {% if project.criteria.count %}
             <a href="{% url 'projects:visit_create' project.pk %}"
-               class="w-full lg:w-auto inline-flex items-center justify-center bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-700 hover:to-emerald-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg text-xl transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+               class="w-full lg:w-auto inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md text-xl transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                role="button"
                aria-label="Log Visit"
                title="Log a new visit">
@@ -199,17 +199,17 @@
                         </div>
                     </a>
                     
-                    <a href="{% url 'projects:visit_create' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="{% url 'projects:realtor_list' project.pk %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <div class="flex-shrink-0">
                             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
                             </div>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">Log Visit</p>
-                            <p class="text-sm text-gray-500">Record a property evaluation</p>
+                            <p class="text-sm font-medium text-gray-900">View Realtors</p>
+                            <p class="text-sm text-gray-500">View all your realtors</p>
                         </div>
                     </a>
                 {% endif %}

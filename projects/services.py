@@ -24,11 +24,14 @@ class EmailService:
     def _validate_settings(self) -> None:
         """Validate that all required email settings are configured."""
         if not self.api_key:
-            raise ValueError("MAILGUN_API_KEY is not set")
+            logger.warning("MAILGUN_API_KEY is not set - email functionality will be disabled")
+            return
         if not self.domain:
-            raise ValueError("MAILGUN_DOMAIN is not set")
+            logger.warning("MAILGUN_DOMAIN is not set - email functionality will be disabled")
+            return
         if not self.default_from_email:
-            raise ValueError("DEFAULT_FROM_EMAIL is not set")
+            logger.warning("DEFAULT_FROM_EMAIL is not set - email functionality will be disabled")
+            return
     
     def _send_email(self, subject: str, html_content: str, recipient_email: str) -> Dict[str, Any]:
         """
@@ -43,6 +46,14 @@ class EmailService:
             Dictionary with send status
         """
         try:
+            # Check if email settings are configured
+            if not all([self.api_key, self.domain, self.default_from_email]):
+                logger.warning("Email settings not configured - skipping email send")
+                return {
+                    'status': 'skipped',
+                    'message': 'Email settings not configured'
+                }
+            
             # Prepare Mailgun API request
             url = f"https://api.mailgun.net/v3/{self.domain}/messages"
             logger.info(f"Sending email to {recipient_email}: {subject}")

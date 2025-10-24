@@ -6,7 +6,7 @@ dev:
 
 # Run tests
 test:
-	uv run python manage.py test projects.tests  
+	uv run python manage.py test
 
 # Run all linters and formatters
 lint:
@@ -27,6 +27,7 @@ prod:
 # Database migrations
 migrate:
 	uv run python manage.py migrate
+	uv run python manage.py createcachetable
 
 makemigrations:
 	uv run python manage.py makemigrations

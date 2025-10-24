@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Max
 from django.db import models
 from django.utils import timezone
+from datetime import datetime
 import json
 import logging
 import csv
@@ -568,7 +569,6 @@ def visit_create(request, pk):
                 
                 try:
                     # Create visit
-                    from datetime import datetime
                     visit_data['visit_date'] = datetime.fromisoformat(visit_data['visit_date']).date()
                     
                     # Handle realtor
@@ -800,45 +800,6 @@ def visit_delete(request, pk, visit_id):
     
     return redirect('projects:visit_list', pk=project.pk)
 # Realtor Management Views
-
-@login_required
-def realtor_create(request, pk):
-    """Create new realtor for a project."""
-    project = get_object_or_404(Project, pk=pk)
-    
-    # Check if user has access to this project
-    if not project.is_member(request.user):
-        messages.error(request, "You don't have access to this project.")
-        return redirect('projects:list')
-    
-    next_url = request.GET.get('next', f'/projects/{project.pk}/visits/')
-    
-    if request.method == 'POST':
-        form = RealtorForm(request.POST)
-        if form.is_valid():
-            realtor = form.save(commit=False)
-            realtor.created_by = request.user
-            
-            try:
-                realtor.save()
-                messages.success(request, f'Realtor "{realtor.name}" created successfully!')
-                return redirect(next_url)
-            except Exception as e:
-                if 'UNIQUE constraint failed' in str(e):
-                    form.add_error('name', 'A realtor with this name already exists.')
-                else:
-                    messages.error(request, 'An error occurred while saving the realtor.')
-    else:
-        form = RealtorForm()
-    
-    context = {
-        'project': project,
-        'form': form,
-        'next_url': next_url,
-        'title': 'Add New Realtor'
-    }
-    return render(request, 'projects/realtor_create.html', context)
-
 
 # Realtor Management Views
 
