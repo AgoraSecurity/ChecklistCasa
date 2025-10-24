@@ -79,6 +79,36 @@
     </div>
 </div>
 
+<!-- Prominent Log Visit CTA -->
+{% if project.status == 'active' %}
+    <div class="mb-6">
+        {% if project.criteria.count %}
+            <a href="{% url 'projects:visit_create' project.pk %}"
+               class="w-full lg:w-auto inline-flex items-center justify-center bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-700 hover:to-emerald-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg text-xl transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+               role="button"
+               aria-label="Log Visit"
+               title="Log a new visit">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Log Visit
+            </a>
+        {% else %}
+            <!-- If no criteria exist, guide user to create criteria first -->
+            <a href="{% url 'projects:criteria_list' project.pk %}"
+               class="w-full lg:w-auto inline-flex items-center justify-center bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg border border-gray-300 shadow-sm text-lg hover:bg-gray-100 transition"
+               role="button"
+               aria-label="Add criteria"
+               title="Add criteria before logging visits">
+                <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 0v4m0-4h4m-4 0H8"></path>
+                </svg>
+                Add criteria to enable logging visits
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+
 <!-- Project Stats -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow p-6">

@@ -198,3 +198,29 @@ input[type="range"][data-show-value="true"] {
         box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
     }
 }
+
+/* CTA accessibility & fallbacks for environments without Tailwind focus utilities */
+.big-cta-fallback {
+    background-image: linear-gradient(90deg, #4f46e5 0%, #10b981 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.08), 0 4px 6px rgba(79, 70, 229, 0.06);
+}
+
+.big-cta-fallback:focus {
+    outline: 3px solid rgba(99, 102, 241, 0.25);
+    outline-offset: 3px;
+}
+
+/* Reduce motion for animated hover transform on users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .big-cta-fallback, .big-cta-fallback:hover {
+        transition: none !important;
+        transform: none !important;
+    }
+}
