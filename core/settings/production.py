@@ -147,5 +147,8 @@ USE_TZ = True
 USE_I18N = False  # Disable if not using internationalization
 USE_L10N = False  # Disable if not using localization
 
+# CSRF and security settings for production
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+
 # Performance optimizations
 CONN_MAX_AGE = 60
