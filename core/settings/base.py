@@ -144,8 +144,13 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Will be overridden in production
-DEFAULT_FROM_EMAIL = 'noreply@checklist.casa'
+#DEFAULT_FROM_EMAIL = 'noreply@checklist.casa'
+DEFAULT_FROM_EMAIL = 'checklist@agorabots.com'
 SERVER_EMAIL = 'server@checklist.casa'
+
+# Mailgun API settings
+MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
+MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True

@@ -2,10 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
-from django.http import JsonResponse, Http404, HttpResponse
+from .services import EmailService
+from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Max
@@ -184,36 +184,26 @@ def send_invitation(request, pk):
             invited_by=request.user
         )
         
-        # Send invitation email
+        # Send invitation email via Mailgun
         try:
             invitation_url = request.build_absolute_uri(
                 reverse('projects:accept_invitation', kwargs={'token': invitation.token})
             )
             
-            subject = f'Invitation to collaborate on "{project.name}"'
-            message = f"""
-Hello!
-
-{request.user.email} has invited you to collaborate on the housing evaluation project "{project.name}".
-
-Click the link below to accept the invitation:
-{invitation_url}
-
-If you don't have an account yet, you'll be able to create one when you accept the invitation.
-
-Best regards,
-The Checklist.casa Team
-            """.strip()
-            
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
+            # Use EmailService to send invitation via Mailgun
+            result = EmailService.send_invitation_email(
+                email=email,
+                project_name=project.name,
+                invitation_url=invitation_url,
+                invited_by_email=request.user.email
             )
             
-            messages.success(request, f'Invitation sent to {email}!')
+            if result['status'] == 'success':
+                messages.success(request, f'Invitation sent to {email}!')
+            else:
+                # If email fails, delete the invitation
+                invitation.delete()
+                messages.error(request, f'Failed to send invitation email: {result["message"]}')
             
         except Exception as e:
             # If email fails, delete the invitation
