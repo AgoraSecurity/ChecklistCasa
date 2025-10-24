@@ -191,7 +191,8 @@ def send_invitation(request, pk):
             )
             
             # Use EmailService to send invitation via Mailgun
-            result = EmailService.send_invitation_email(
+            email_service = EmailService()
+            result = email_service.send_invitation_email(
                 email=email,
                 project_name=project.name,
                 invitation_url=invitation_url,
@@ -209,6 +210,7 @@ def send_invitation(request, pk):
             # If email fails, delete the invitation
             invitation.delete()
             messages.error(request, f'Failed to send invitation email. Please try again.')
+            logger.error(f'Failed to send invitation email: {e}')
     
     else:
         for field, errors in form.errors.items():

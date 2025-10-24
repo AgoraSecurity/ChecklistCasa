@@ -4,7 +4,7 @@ Email services for the projects app.
 
 import logging
 import requests
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -12,9 +12,25 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     """Service for sending emails via Mailgun API."""
+
+    def __init__(self):
+        self.api_key = settings.MAILGUN_API_KEY
+        self.domain = settings.MAILGUN_DOMAIN
+        self.default_from_email = settings.DEFAULT_FROM_EMAIL
+        
+        # Validate settings
+        self._validate_settings()
     
-    @staticmethod
-    def _send_email(subject: str, html_content: str, recipient_email: str) -> Dict[str, Any]:
+    def _validate_settings(self) -> None:
+        """Validate that all required email settings are configured."""
+        if not self.api_key:
+            raise ValueError("MAILGUN_API_KEY is not set")
+        if not self.domain:
+            raise ValueError("MAILGUN_DOMAIN is not set")
+        if not self.default_from_email:
+            raise ValueError("DEFAULT_FROM_EMAIL is not set")
+    
+    def _send_email(self, subject: str, html_content: str, recipient_email: str) -> Dict[str, Any]:
         """
         Send email via Mailgun API.
         
@@ -28,12 +44,13 @@ class EmailService:
         """
         try:
             # Prepare Mailgun API request
-            url = f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages"
+            url = f"https://api.mailgun.net/v3/{self.domain}/messages"
+            logger.info(f"Sending email to {recipient_email}: {subject}")
             
-            auth = ('api', settings.MAILGUN_API_KEY)
+            auth = ('api', self.api_key)
             
             data = {
-                'from': settings.DEFAULT_FROM_EMAIL,
+                'from': self.default_from_email,
                 'to': recipient_email,
                 'subject': subject,
                 'html': html_content
@@ -41,22 +58,22 @@ class EmailService:
             
             # Send the email
             response = requests.post(url, auth=auth, data=data, timeout=30)
+            response.raise_for_status()
             
-            if response.status_code == 200:
-                logger.info(f"Email sent successfully via Mailgun: {response.json()}")
-                return {
-                    'status': 'success',
-                    'message': 'Email sent successfully',
-                    'mailgun_response': response.json()
-                }
-            else:
-                logger.error(f"Mailgun API error: {response.status_code} - {response.text}")
-                return {
-                    'status': 'error',
-                    'message': f'Mailgun API error: {response.status_code}',
-                    'details': response.text
-                }
+            logger.info(f"Email sent successfully via Mailgun to {recipient_email}")
+            return {
+                'status': 'success',
+                'message': 'Email sent successfully',
+                'mailgun_response': response.json()
+            }
                 
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Mailgun API error: {e.response.status_code} - {e.response.text}")
+            return {
+                'status': 'error',
+                'message': f'Mailgun API error: {e.response.status_code}',
+                'details': e.response.text
+            }
         except requests.exceptions.RequestException as e:
             logger.error(f"Network error sending email: {str(e)}")
             return {
@@ -70,8 +87,13 @@ class EmailService:
                 'message': f'Unexpected error: {str(e)}'
             }
     
-    @staticmethod
-    def send_invitation_email(email: str, project_name: str, invitation_url: str, invited_by_email: str) -> Dict[str, Any]:
+    def send_invitation_email(
+        self, 
+        email: str, 
+        project_name: str, 
+        invitation_url: str, 
+        invited_by_email: str
+    ) -> Dict[str, Any]:
         """
         Send project invitation email via Mailgun API.
         
@@ -102,7 +124,7 @@ class EmailService:
             </html>
             """
             
-            return EmailService._send_email(
+            return self._send_email(
                 subject=subject,
                 html_content=html_content,
                 recipient_email=email
@@ -115,8 +137,7 @@ class EmailService:
                 'message': f'Error sending invitation email: {str(e)}'
             }
     
-    @staticmethod
-    def send_home_upload_confirmation(user, home_name: str) -> Dict[str, Any]:
+    def send_home_upload_confirmation(self, user, home_name: str) -> Dict[str, Any]:
         """
         Send confirmation email after home upload if user has opted in.
         
@@ -130,6 +151,7 @@ class EmailService:
         try:
             # Check if user wants to receive confirmation emails
             if not hasattr(user, 'profile') or not user.profile.receive_confirmation_emails:
+                logger.info(f"Skipping confirmation email for user {user.email} - opted out")
                 return {
                     'status': 'skipped',
                     'message': 'User has opted out of confirmation emails'
@@ -150,7 +172,7 @@ class EmailService:
             </html>
             """
             
-            return EmailService._send_email(
+            return self._send_email(
                 subject=subject,
                 html_content=html_content,
                 recipient_email=user.email
