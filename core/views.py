@@ -190,3 +190,13 @@ def basic_health_check(request):
         return JsonResponse({'status': 'ok'}, status=200)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=503)
+
+
+def terms_of_service(request):
+    """Terms of Service page."""
+    return render(request, "legal/terms_of_service.html")
+
+
+def privacy_policy(request):
+    """Privacy Policy page."""
+    return render(request, "legal/privacy_policy.html")

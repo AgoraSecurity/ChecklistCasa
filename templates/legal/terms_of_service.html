@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - Checklist.casa{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white shadow-sm rounded-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Terms of Service</h1>
+
+        <div class="prose prose-lg max-w-none">
+            <p class="text-gray-600 mb-6">
+                <strong>Last updated:</strong> October 24, 2025
+            </p>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
+                <p class="text-gray-700 mb-4">
+                    By accessing and using Checklist.casa ("Service"), you accept and agree to be bound by the terms and
+                    provision of this agreement. If you do not agree to abide by the above, please do not use this
+                    service.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Description of Service</h2>
+                <p class="text-gray-700 mb-4">
+                    Checklist.casa is a housing evaluation platform that allows users to create projects, conduct
+                    property visits, and evaluate housing options using customizable criteria and checklists.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. User Accounts</h2>
+                <p class="text-gray-700 mb-4">
+                    To access certain features of the Service, you must register for an account. You agree to:
+                </p>
+                <ul class="list-disc pl-6 text-gray-700 mb-4">
+                    <li>Provide accurate, current, and complete information during registration</li>
+                    <li>Maintain and update your account information</li>
+                    <li>Keep your password secure and confidential</li>
+                    <li>Accept responsibility for all activities under your account</li>
+                </ul>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. User Content and Conduct</h2>
+                <p class="text-gray-700 mb-4">
+                    You retain ownership of content you create on the Service. However, you grant us a license to use,
+                    store, and display your content as necessary to provide the Service. You agree not to:
+                </p>
+                <ul class="list-disc pl-6 text-gray-700 mb-4">
+                    <li>Upload illegal, harmful, or inappropriate content</li>
+                    <li>Violate any applicable laws or regulations</li>
+                    <li>Interfere with or disrupt the Service</li>
+                    <li>Attempt to gain unauthorized access to the Service</li>
+                </ul>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Privacy</h2>
+                <p class="text-gray-700 mb-4">
+                    Your privacy is important to us. Please review our <a href="{% url 'privacy_policy' %}"
+                        class="text-blue-600 hover:text-blue-800">Privacy Policy</a>, which also governs your use of the
+                    Service.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Service Availability</h2>
+                <p class="text-gray-700 mb-4">
+                    We strive to maintain the Service's availability but cannot guarantee uninterrupted access. We
+                    reserve the right to modify, suspend, or discontinue the Service at any time with or without notice.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">7. Limitation of Liability</h2>
+                <p class="text-gray-700 mb-4">
+                    The Service is provided "as is" without warranties of any kind. We shall not be liable for any
+                    indirect, incidental, special, consequential, or punitive damages resulting from your use of the
+                    Service.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">8. Termination</h2>
+                <p class="text-gray-700 mb-4">
+                    We may terminate or suspend your account and access to the Service immediately, without prior
+                    notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third
+                    parties.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Changes to Terms</h2>
+                <p class="text-gray-700 mb-4">
+                    We reserve the right to modify these Terms at any time. We will notify users of significant changes
+                    by posting the new Terms on this page. Your continued use of the Service after such modifications
+                    constitutes acceptance of the updated Terms.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">10. Contact Information</h2>
+                <p class="text-gray-700 mb-4">
+                    If you have any questions about these Terms of Service, please contact us through the Service or at
+                    the contact information provided on our website.
+                </p>
+            </section>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <a href="{% url 'home' %}" class="text-blue-600 hover:text-blue-800">← Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
