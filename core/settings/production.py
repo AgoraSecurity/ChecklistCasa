@@ -20,12 +20,12 @@ ALLOWED_HOSTS = [
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 ANYMAIL = {
     "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY", ""),
-    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN", "checklist.casa"),
+    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN", "agorabots.com"),
 }
 DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL", "Checklist.casa <noreply@checklist.casa>"
+    "DEFAULT_FROM_EMAIL", "Checklist.casa <checklist.casa@agorabots.com>"
 )
-SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "server@checklist.casa")
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "checklist.casa@agorabots.com")
 
 # Email timeout settings
 EMAIL_TIMEOUT = 30
