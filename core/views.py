@@ -1,12 +1,13 @@
-from django.db.models import Q
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.db import connection
-from django.core.cache import cache
-from django.conf import settings
 import time
 from pathlib import Path
+
+from django.conf import settings
+from django.core.cache import cache
+from django.db import connection
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 
 from projects.models import Project
 
@@ -98,83 +99,79 @@ def health_check(request):
     Returns HTTP 200 if the application is healthy, 503 if not.
     """
     start_time = time.time()
-    health_status = {
-        'status': 'healthy',
-        'timestamp': int(time.time()),
-        'checks': {}
-    }
-    
+    health_status = {"status": "healthy", "timestamp": int(time.time()), "checks": {}}
+
     overall_healthy = True
-    
+
     # Check database connectivity
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
-        health_status['checks']['database'] = {
-            'status': 'healthy',
-            'message': 'Database connection successful'
+        health_status["checks"]["database"] = {
+            "status": "healthy",
+            "message": "Database connection successful",
         }
     except Exception as e:
-        health_status['checks']['database'] = {
-            'status': 'unhealthy',
-            'message': f'Database connection failed: {str(e)}'
+        health_status["checks"]["database"] = {
+            "status": "unhealthy",
+            "message": f"Database connection failed: {str(e)}",
         }
         overall_healthy = False
-    
+
     # Check cache (if configured) - don't fail overall health for cache issues
     try:
-        cache.set('health_check_test', 'ok', 10)
-        cache_result = cache.get('health_check_test')
-        if cache_result == 'ok':
-            health_status['checks']['cache'] = {
-                'status': 'healthy',
-                'message': 'Cache is working'
+        cache.set("health_check_test", "ok", 10)
+        cache_result = cache.get("health_check_test")
+        if cache_result == "ok":
+            health_status["checks"]["cache"] = {
+                "status": "healthy",
+                "message": "Cache is working",
             }
         else:
-            health_status['checks']['cache'] = {
-                'status': 'unhealthy',
-                'message': 'Cache read/write test failed'
+            health_status["checks"]["cache"] = {
+                "status": "unhealthy",
+                "message": "Cache read/write test failed",
             }
             # Don't fail overall health for cache issues
     except Exception as e:
-        health_status['checks']['cache'] = {
-            'status': 'unhealthy',
-            'message': f'Cache error: {str(e)}'
+        health_status["checks"]["cache"] = {
+            "status": "unhealthy",
+            "message": f"Cache error: {str(e)}",
         }
         # Don't fail overall health for cache issues
-    
+
     # Check static files directory
     try:
         static_root = Path(settings.STATIC_ROOT)
         if static_root.exists() and static_root.is_dir():
-            health_status['checks']['static_files'] = {
-                'status': 'healthy',
-                'message': 'Static files directory accessible'
+            health_status["checks"]["static_files"] = {
+                "status": "healthy",
+                "message": "Static files directory accessible",
             }
         else:
-            health_status['checks']['static_files'] = {
-                'status': 'unhealthy',
-                'message': 'Static files directory not accessible'
+            health_status["checks"]["static_files"] = {
+                "status": "unhealthy",
+                "message": "Static files directory not accessible",
             }
             overall_healthy = False
     except Exception as e:
-        health_status['checks']['static_files'] = {
-            'status': 'unhealthy',
-            'message': f'Static files check failed: {str(e)}'
+        health_status["checks"]["static_files"] = {
+            "status": "unhealthy",
+            "message": f"Static files check failed: {str(e)}",
         }
         overall_healthy = False
-    
+
     # Calculate response time
     response_time = round((time.time() - start_time) * 1000, 2)
-    health_status['response_time_ms'] = response_time
-    
+    health_status["response_time_ms"] = response_time
+
     # Set overall status
     if not overall_healthy:
-        health_status['status'] = 'unhealthy'
-    
+        health_status["status"] = "unhealthy"
+
     # Return appropriate HTTP status code
     status_code = 200 if overall_healthy else 503
-    
+
     return JsonResponse(health_status, status=status_code)
 
 
@@ -187,9 +184,9 @@ def basic_health_check(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
-        return JsonResponse({'status': 'ok'}, status=200)
+        return JsonResponse({"status": "ok"}, status=200)
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=503)
+        return JsonResponse({"status": "error", "message": str(e)}, status=503)
 
 
 def terms_of_service(request):
