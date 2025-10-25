@@ -1,3 +1,4 @@
+import logging
 import time
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from django.views.decorators.http import require_http_methods
 
 from projects.models import Project
 
+logger = logging.getLogger(__name__)
+
 
 def home_view(request):
     """
@@ -20,6 +23,10 @@ def home_view(request):
     - Authenticated with projects but no active project: Project selection
     - Authenticated with active project: Log new visit prompt
     """
+    logger.info(
+        f"Home view accessed by user: {request.user.email if request.user.is_authenticated else 'anonymous'}"
+    )
+
     if not request.user.is_authenticated:
         # User not logged in - show landing page
         return render(
@@ -191,9 +198,15 @@ def basic_health_check(request):
 
 def terms_of_service(request):
     """Terms of Service page."""
+    logger.info(
+        f"Terms of Service accessed by user: {request.user.email if request.user.is_authenticated else 'anonymous'}"
+    )
     return render(request, "legal/terms_of_service.html")
 
 
 def privacy_policy(request):
     """Privacy Policy page."""
+    logger.info(
+        f"Privacy Policy accessed by user: {request.user.email if request.user.is_authenticated else 'anonymous'}"
+    )
     return render(request, "legal/privacy_policy.html")

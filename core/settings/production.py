@@ -2,9 +2,20 @@
 Production settings for Housing Evaluation System.
 """
 
+import logging
 import os
 
 from .base import *
+
+# Configure basic logging early
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s %(asctime)s %(module)s %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+
+logger = logging.getLogger(__name__)
+logger.info("Loading production settings for Checklist.casa")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -12,7 +23,9 @@ DEBUG = False
 # Allowed hosts configuration
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(
+        ","
+    )
     if host.strip()
 ]
 
@@ -83,19 +96,15 @@ LOGGING = {
             "style": "{",
         },
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {asctime} {message}",
             "style": "{",
-        },
-    },
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+            "stream": "ext://sys.stdout",
         },
         "mail_admins": {
             "level": "ERROR",
@@ -104,27 +113,47 @@ LOGGING = {
             "formatter": "verbose",
         },
     },
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+    },
     "root": {
         "handlers": ["console"],
         "level": "INFO",
     },
     "loggers": {
         "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.request": {
             "handlers": ["console", "mail_admins"],
             "level": "INFO",
             "propagate": False,
         },
         "django.security": {
-            "handlers": ["console", "mail_admins"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
-        "django.request": {
-            "handlers": ["console", "mail_admins"],
-            "level": "ERROR",
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "WARNING",
             "propagate": False,
         },
         "projects": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "accounts": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "core": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

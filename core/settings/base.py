@@ -54,6 +54,10 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
+# Add request logging middleware only in production
+if not os.environ.get("DJANGO_SETTINGS_MODULE", "").endswith("development"):
+    MIDDLEWARE.insert(2, "core.middleware.RequestLoggingMiddleware")
+
 ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [

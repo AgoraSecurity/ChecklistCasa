@@ -21,9 +21,6 @@ uv run python manage.py collectstatic --noinput --clear
 # Verify static files were collected
 echo "Verifying static files..."
 ls -la /app/staticfiles/ || echo "Static files directory not found"
-ls -la /app/staticfiles/admin/ || echo "Admin static files not found"
-ls -la /app/staticfiles/admin/css/ || echo "Admin CSS files not found"
-ls -la /app/staticfiles/admin/js/ || echo "Admin JS files not found"
 
 # Check if specific files exist
 echo "Checking specific admin files..."
