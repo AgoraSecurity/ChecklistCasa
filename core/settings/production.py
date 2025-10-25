@@ -29,8 +29,8 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
-# Email configuration for production (Mailgun via Anymail)
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+# Email configuration for production (Mailgun via Anymail with logging)
+EMAIL_BACKEND = "core.email_backend.LoggingMailgunBackend"
 ANYMAIL = {
     "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY", ""),
     "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN", "agorabots.com"),
