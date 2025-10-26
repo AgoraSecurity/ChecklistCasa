@@ -158,6 +158,11 @@ EMAIL_BACKEND = (
 DEFAULT_FROM_EMAIL = "checklist.casa@agorabots.com"
 SERVER_EMAIL = "checklist.casa@agorabots.com"
 
+# Public site settings used by Django Sites / allauth when rendering emails/links.
+# Can be overridden via the environment (recommended in production).
+SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "checklist.casa")
+SITE_NAME = os.environ.get("SITE_NAME", "Checklist.casa")
+
 # Mailgun API settings
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", "")
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN", "")
